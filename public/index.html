@@ -2,560 +2,1794 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elective Registration</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
- --p:#673ab7;--pd:#5e35b1;--bg:#f0ebf8;--text:#202124;
- --muted:#5f6368;--line:#ddd;--red:#d93025;--green:#188038;
- --orange:#e37400
+  --purple:#673ab7;
+  --purple-dark:#5e35b1;
+  --bg:#f0ebf8;
+  --card:#fff;
+  --line:#dadce0;
+  --text:#202124;
+  --muted:#5f6368;
+  --red:#d93025;
+  --green:#188038;
+  --orange:#e37400;
 }
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Roboto,Arial}
-.page{max-width:760px;margin:auto;padding:25px 15px 70px}
-.bar{height:10px;background:var(--p);border-radius:8px 8px 0 0}
-.card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:24px;margin-bottom:18px}
-.first{border-radius:0 0 8px 8px}
-h1,h2{font-family:"Google Sans",Roboto;font-weight:400}
-h1{font-size:28px;margin:0 0 10px}
-h2{font-size:20px}
-.desc,.muted{color:var(--muted);font-size:14px;white-space:pre-wrap}
-.field{margin:18px 0}
-label{display:block;font-size:14px;margin-bottom:7px}
-.req{color:var(--red)}
-input,textarea{width:100%;padding:12px;border:1px solid #aaa;border-radius:4px;font:15px Roboto}
-textarea{min-height:90px;resize:vertical}
-input:focus,textarea:focus{outline:none;border:2px solid var(--p)}
-button{padding:10px 18px;border-radius:5px;font:500 14px "Google Sans";cursor:pointer}
-.primary{background:var(--p);color:#fff;border:0}
-.primary:hover{background:var(--pd)}
-.secondary{background:#fff;color:var(--p);border:1px solid var(--p)}
-.danger{background:#fff;color:var(--red);border:1px solid #ddd}
-button:disabled{opacity:.6}
-.actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-.auth{text-align:center;color:var(--muted);font-size:14px;margin-top:18px}
-.auth span{color:var(--p);cursor:pointer}
-.error{background:#fce8e6;color:var(--red);padding:12px;border-radius:5px;margin:12px 0}
-.success{background:#e6f4ea;color:var(--green);padding:12px;border-radius:5px;margin:12px 0}
-.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;gap:10px}
-.brand{font:700 20px "Google Sans";color:var(--p)}
-.user{font-size:13px;color:var(--muted);margin-top:3px}
-.row{display:grid;grid-template-columns:1fr 110px 75px;gap:8px;margin:10px 0}
-.formTitle{font:18px "Google Sans"}
-.meta{font-size:13px;color:var(--muted);margin:6px 0 15px}
-.link{display:flex;gap:8px;background:#f3edfb;border:1px solid var(--p);padding:10px;border-radius:5px}
-.link input{border:0;background:transparent;flex:1;min-width:0}
-.option{display:flex;align-items:center;gap:10px;padding:13px 3px;border-bottom:1px solid #eee}
-.option input{width:auto}
-.option label{flex:1;margin:0}
-.seat{font-size:12px;padding:4px 8px;border-radius:12px;white-space:nowrap}
-.open{color:var(--green);background:#e6f4ea}
-.low{color:var(--orange);background:#fef3e0}
-.full{color:var(--red);background:#fce8e6}
-.center{text-align:center}
-.check{font-size:50px;color:var(--green)}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Roboto,Arial,sans-serif;
+}
+
+.page{
+  max-width:760px;
+  margin:auto;
+  padding:25px 15px 70px;
+}
+
+.top-bar{
+  height:10px;
+  background:var(--purple);
+  border-radius:8px 8px 0 0;
+}
+
+.card{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:24px;
+  margin-bottom:18px;
+}
+
+.main-card{
+  border-radius:0 0 8px 8px;
+}
+
+h1{
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:28px;
+  font-weight:400;
+  margin:0 0 10px;
+}
+
+h2{
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-weight:500;
+}
+
+.description{
+  color:var(--muted);
+  font-size:14px;
+  white-space:pre-wrap;
+}
+
+label{
+  display:block;
+  font-size:14px;
+  margin-bottom:7px;
+}
+
+.required{
+  color:var(--red);
+}
+
+input,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #aaa;
+  border-radius:4px;
+  font-size:15px;
+  font-family:Roboto,sans-serif;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+input:focus,
+textarea:focus{
+  outline:none;
+  border:2px solid var(--purple);
+}
+
+.field{
+  margin-bottom:20px;
+}
+
+button{
+  border:none;
+  border-radius:5px;
+  padding:11px 20px;
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+}
+
+.primary{
+  background:var(--purple);
+  color:white;
+}
+
+.primary:hover{
+  background:var(--purple-dark);
+}
+
+.secondary{
+  background:white;
+  color:var(--purple);
+  border:1px solid var(--purple);
+}
+
+.danger{
+  background:white;
+  color:var(--red);
+  border:1px solid #ddd;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.auth-switch{
+  margin-top:18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.auth-switch span{
+  color:var(--purple);
+  cursor:pointer;
+}
+
+.error{
+  background:#fce8e6;
+  color:var(--red);
+  padding:12px;
+  border-radius:5px;
+  margin:12px 0;
+}
+
+.success{
+  background:#e6f4ea;
+  color:var(--green);
+  padding:12px;
+  border-radius:5px;
+  margin:12px 0;
+}
+
+.nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  gap:10px;
+}
+
+.brand{
+  color:var(--purple);
+  font-family:"Google Sans";
+  font-size:20px;
+  font-weight:700;
+}
+
+.user{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 120px 80px;
+  gap:10px;
+  margin-bottom:12px;
+  align-items:center;
+}
+
+.form-card{
+  padding:20px;
+}
+
+.form-card-title{
+  font-family:"Google Sans";
+  font-size:18px;
+  margin-bottom:5px;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:15px;
+}
+
+.elective{
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+  display:flex;
+  justify-content:space-between;
+}
+
+.elective:last-child{
+  border-bottom:none;
+}
+
+.link-box{
+  display:flex;
+  gap:8px;
+  background:#f3edfb;
+  padding:10px;
+  border:1px solid var(--purple);
+  border-radius:5px;
+  margin-top:15px;
+}
+
+.link-box input{
+  flex:1;
+  border:none;
+  background:transparent;
+  min-width:0;
+}
+
+.option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 5px;
+  border-bottom:1px solid #eee;
+}
+
+.option input{
+  width:auto;
+}
+
+.option label{
+  flex:1;
+  margin:0;
+  cursor:pointer;
+}
+
+.seats{
+  font-size:12px;
+  padding:4px 9px;
+  border-radius:15px;
+  white-space:nowrap;
+}
+
+.available{
+  color:var(--green);
+  background:#e6f4ea;
+}
+
+.almost{
+  color:var(--orange);
+  background:#fef3e0;
+}
+
+.full{
+  color:var(--red);
+  background:#fce8e6;
+}
+
+.confirm{
+  text-align:center;
+  padding:50px 20px;
+}
+
+.check{
+  font-size:50px;
+  color:var(--green);
+}
+
+.center{
+  text-align:center;
+}
+
+.empty{
+  color:var(--muted);
+  text-align:center;
+  padding:25px;
+}
+
 @media(max-width:600px){
- .page{padding:12px 8px 50px}
- .card{padding:18px}
- .row{grid-template-columns:1fr}
- .nav{align-items:flex-start;flex-direction:column}
- .link{flex-direction:column}
- .link button{width:100%}
+
+  .page{
+    padding:12px 8px 50px;
+  }
+
+  .card{
+    padding:18px;
+  }
+
+  .form-row{
+    grid-template-columns:1fr;
+  }
+
+  .nav{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .link-box{
+    flex-direction:column;
+  }
+
+  .link-box button{
+    width:100%;
+  }
 }
 </style>
 </head>
 
 <body>
+
 <div class="page" id="app"></div>
 
 <script>
-const app=document.getElementById("app");
-const formID=new URLSearchParams(location.search).get("form");
 
-function esc(v){
- const d=document.createElement("div");
- d.textContent=v==null?"":String(v);
- return d.innerHTML;
+const app = document.getElementById("app");
+
+const params = new URLSearchParams(window.location.search);
+const formId = params.get("form");
+
+
+/* =========================
+   API HELPER
+========================= */
+
+async function api(url, options = {}) {
+
+  try {
+
+    const response = await fetch(url, {
+      credentials: "same-origin",
+      ...options,
+      headers: {
+        ...(options.body ? {"Content-Type":"application/json"} : {}),
+        ...(options.headers || {})
+      }
+    });
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Server returned an invalid response.");
+    }
+
+    return data;
+
+  } catch(error) {
+
+    console.error(error);
+
+    return {
+      ok:false,
+      error:error.message || "Network error"
+    };
+
+  }
 }
 
-async function api(url,opt={}){
- try{
-  const r=await fetch(url,{
-   credentials:"same-origin",
-   ...opt,
-   headers:{
-    ...(opt.body?{"Content-Type":"application/json"}:{}),
-    ...(opt.headers||{})
-   }
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+  const div = document.createElement("div");
+
+  div.textContent = value == null ? "" : String(value);
+
+  return div.innerHTML;
+
+}
+
+
+/* =========================
+   START APP
+========================= */
+
+boot();
+
+
+async function boot(){
+
+  if(formId){
+
+    renderStudent(formId);
+
+    return;
+  }
+
+  const result = await api("/api/me");
+
+  if(result.ok && result.teacher){
+
+    renderDashboard(result.teacher);
+
+  }else{
+
+    renderLogin();
+
+  }
+
+}
+
+
+/* =========================
+   LOGIN
+========================= */
+
+function renderLogin(){
+
+  app.innerHTML = `
+
+    <div class="top-bar"></div>
+
+    <div class="card main-card">
+
+      <h1>Teacher Login</h1>
+
+      <p class="description">
+        Log in to create and manage elective registration forms.
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="field">
+
+        <label>
+          Email <span class="required">*</span>
+        </label>
+
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="teacher@example.com"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Password <span class="required">*</span>
+        </label>
+
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+        >
+
+      </div>
+
+
+      <div id="loginMessage"></div>
+
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="loginButton"
+        >
+          Login
+        </button>
+
+      </div>
+
+
+      <div class="auth-switch">
+
+        Don't have an account?
+
+        <span id="showSignup">
+          Create account
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("loginButton")
+    .onclick = login;
+
+
+  document
+    .getElementById("showSignup")
+    .onclick = renderSignup;
+
+}
+
+
+async function login(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+
+  const button =
+    document.getElementById("loginButton");
+
+  button.disabled = true;
+
+
+  const result = await api("/api/login", {
+
+    method:"POST",
+
+    body:JSON.stringify({
+      email,
+      password
+    })
+
   });
-  const text=await r.text();
-  try{return JSON.parse(text)}
-  catch{return {ok:false,error:"Server returned an invalid response."}}
- }catch(e){
-  return {ok:false,error:e.message||"Network error"};
- }
-}
-
-start();
-
-async function start(){
- if(formID)return student(formID);
- const me=await api("/api/me");
- if(me.ok&&me.teacher)dashboard(me.teacher);
- else login();
-}
 
 
-/* LOGIN */
+  if(result.ok){
 
-function login(){
- app.innerHTML=`
- <div class="bar"></div>
- <div class="card first">
-  <h1>Teacher Login</h1>
-  <p class="desc">Log in to create and manage elective registration forms.</p>
- </div>
- <div class="card">
-  <div class="field">
-   <label>Email <span class="req">*</span></label>
-   <input id="email" type="email" placeholder="teacher@example.com">
-  </div>
-  <div class="field">
-   <label>Password <span class="req">*</span></label>
-   <input id="password" type="password" placeholder="Password">
-  </div>
-  <div id="msg"></div>
-  <button class="primary" id="go">Log in</button>
-  <div class="auth">New here? <span id="signup">Create an account</span></div>
- </div>`;
- document.getElementById("go").onclick=doLogin;
- document.getElementById("signup").onclick=signup;
-}
+    const me = await api("/api/me");
 
-async function doLogin(){
- const b=document.getElementById("go");
- b.disabled=true;
- const r=await api("/api/login",{
-  method:"POST",
-  body:JSON.stringify({
-   email:document.getElementById("email").value.trim(),
-   password:document.getElementById("password").value
-  })
- });
- if(r.ok){
-  const me=await api("/api/me");
-  dashboard(me.teacher);
- }else{
-  document.getElementById("msg").innerHTML=`<div class="error">${esc(r.error)}</div>`;
-  b.disabled=false;
- }
+    renderDashboard(me.teacher);
+
+  }else{
+
+    document.getElementById("loginMessage").innerHTML =
+      `<div class="error">${escapeHtml(result.error)}</div>`;
+
+    button.disabled = false;
+
+  }
+
 }
 
 
-/* SIGNUP */
+/* =========================
+   SIGNUP
+========================= */
 
-function signup(){
- app.innerHTML=`
- <div class="bar"></div>
- <div class="card first">
-  <h1>Create Teacher Account</h1>
-  <p class="desc">Create your account once to manage your forms.</p>
- </div>
- <div class="card">
-  <div class="field">
-   <label>Name</label>
-   <input id="name" placeholder="Your name">
-  </div>
-  <div class="field">
-   <label>Email <span class="req">*</span></label>
-   <input id="email" type="email" placeholder="teacher@example.com">
-  </div>
-  <div class="field">
-   <label>Password <span class="req">*</span></label>
-   <input id="password" type="password" placeholder="At least 6 characters">
-  </div>
-  <div id="msg"></div>
-  <button class="primary" id="go">Sign up</button>
-  <div class="auth">Already have an account? <span id="login">Log in</span></div>
- </div>`;
- document.getElementById("go").onclick=doSignup;
- document.getElementById("login").onclick=login;
+function renderSignup(){
+
+  app.innerHTML = `
+
+    <div class="top-bar"></div>
+
+    <div class="card main-card">
+
+      <h1>Create Teacher Account</h1>
+
+      <p class="description">
+        Create your account once and then create your elective forms.
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="field">
+
+        <label>
+          Name
+        </label>
+
+        <input
+          id="signupName"
+          type="text"
+          placeholder="Your name"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Email <span class="required">*</span>
+        </label>
+
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="teacher@example.com"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Password <span class="required">*</span>
+        </label>
+
+        <input
+          id="signupPassword"
+          type="password"
+          placeholder="At least 6 characters"
+        >
+
+      </div>
+
+
+      <div id="signupMessage"></div>
+
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="signupButton"
+        >
+          Sign Up
+        </button>
+
+      </div>
+
+
+      <div class="auth-switch">
+
+        Already have an account?
+
+        <span id="showLogin">
+          Login
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("signupButton")
+    .onclick = signup;
+
+
+  document
+    .getElementById("showLogin")
+    .onclick = renderLogin;
+
 }
 
-async function doSignup(){
- const b=document.getElementById("go");
- b.disabled=true;
- const r=await api("/api/signup",{
-  method:"POST",
-  body:JSON.stringify({
-   name:document.getElementById("name").value.trim(),
-   email:document.getElementById("email").value.trim(),
-   password:document.getElementById("password").value
-  })
- });
- if(r.ok){
-  const me=await api("/api/me");
-  dashboard(me.teacher);
- }else{
-  document.getElementById("msg").innerHTML=`<div class="error">${esc(r.error)}</div>`;
-  b.disabled=false;
- }
+
+async function signup(){
+
+  const name =
+    document.getElementById("signupName").value.trim();
+
+  const email =
+    document.getElementById("signupEmail").value.trim();
+
+  const password =
+    document.getElementById("signupPassword").value;
+
+
+  const button =
+    document.getElementById("signupButton");
+
+  button.disabled = true;
+
+
+  const result = await api("/api/signup", {
+
+    method:"POST",
+
+    body:JSON.stringify({
+      name,
+      email,
+      password
+    })
+
+  });
+
+
+  if(result.ok){
+
+    const me = await api("/api/me");
+
+    renderDashboard(me.teacher);
+
+  }else{
+
+    document.getElementById("signupMessage").innerHTML =
+      `<div class="error">${escapeHtml(result.error)}</div>`;
+
+    button.disabled = false;
+
+  }
+
 }
 
 
-/* DASHBOARD */
+/* =========================
+   DASHBOARD
+========================= */
 
-async function dashboard(teacher){
- app.innerHTML=`
- <div class="nav">
-  <div>
-   <div class="brand">Elective Registration</div>
-   <div class="user">${esc(teacher.name||teacher.email)}</div>
-  </div>
-  <div class="actions">
-   <button class="secondary" id="logout">Logout</button>
-   <button class="primary" id="new">+ Create Form</button>
-  </div>
- </div>
- <div id="forms"><div class="card center">Loading forms...</div></div>`;
+async function renderDashboard(teacher){
 
- document.getElementById("logout").onclick=logout;
- document.getElementById("new").onclick=builder;
+  app.innerHTML = `
 
- const r=await api("/api/forms");
+    <div class="nav">
 
- if(!r.ok){
-  document.getElementById("forms").innerHTML=
-   `<div class="card"><div class="error">${esc(r.error)}</div></div>`;
-  return;
- }
+      <div>
 
- if(!r.forms.length){
-  document.getElementById("forms").innerHTML=`
-   <div class="card center">
-    <h2>No forms yet</h2>
-    <p class="muted">Create your first elective registration form.</p>
-    <button class="primary" onclick="builder()">+ Create Form</button>
-   </div>`;
-  return;
- }
+        <div class="brand">
+          Elective Registration
+        </div>
 
- document.getElementById("forms").innerHTML=r.forms.map(f=>`
-  <div class="card">
-   <div class="formTitle">${esc(f.title)}</div>
-   <div class="meta">${esc(f.description||"No description")}</div>
-   <div class="meta">${f.totalTaken} responses / ${f.totalCapacity} seats</div>
-   <div class="actions">
-    <button class="primary" onclick="openForm('${f.id}')">Open Link</button>
-    <button class="secondary" onclick="csv('${f.id}')">Download CSV</button>
-   </div>
-  </div>`).join("");
+        <div class="user">
+          ${escapeHtml(teacher.name || teacher.email)}
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button
+          class="secondary"
+          id="logoutButton"
+        >
+          Logout
+        </button>
+
+        <button
+          class="primary"
+          id="newFormButton"
+        >
+          + Create Form
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="dashboardContent">
+      <div class="card center">
+        Loading forms...
+      </div>
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("logoutButton")
+    .onclick = logout;
+
+
+  document
+    .getElementById("newFormButton")
+    .onclick = () => renderBuilder(teacher);
+
+
+  const result = await api("/api/forms");
+
+
+  if(!result.ok){
+
+    document.getElementById("dashboardContent").innerHTML =
+      `<div class="card"><div class="error">${escapeHtml(result.error)}</div></div>`;
+
+    return;
+
+  }
+
+
+  const forms = result.forms || [];
+
+
+  if(forms.length === 0){
+
+    document.getElementById("dashboardContent").innerHTML = `
+
+      <div class="card empty">
+
+        <h2>No forms yet</h2>
+
+        <p>
+          Create your first elective registration form.
+        </p>
+
+        <button
+          class="primary"
+          onclick="renderBuilder()"
+        >
+          + Create Form
+        </button>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  document.getElementById("dashboardContent").innerHTML =
+
+    forms.map(form => `
+
+      <div class="card form-card">
+
+        <div class="form-card-title">
+          ${escapeHtml(form.title)}
+        </div>
+
+        <div class="meta">
+          ${escapeHtml(form.description || "No description")}
+        </div>
+
+        <div class="meta">
+
+          ${form.totalTaken}
+          responses /
+          ${form.totalCapacity}
+          total seats
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="primary"
+            onclick="openForm('${form.id}')"
+          >
+            Open Link
+          </button>
+
+
+          <button
+            class="secondary"
+            onclick="downloadCSV('${form.id}')"
+          >
+            Download CSV
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
 }
+
+
+/* =========================
+   LOGOUT
+========================= */
 
 async function logout(){
- await api("/api/logout",{method:"POST"});
- location.reload();
+
+  await api("/api/logout", {
+    method:"POST"
+  });
+
+  location.reload();
+
 }
+
+
+/* =========================
+   BUILDER
+========================= */
+
+function renderBuilder(){
+
+  app.innerHTML = `
+
+    <div class="nav">
+
+      <div class="brand">
+        Create Elective Form
+      </div>
+
+      <button
+        class="secondary"
+        id="backButton"
+      >
+        ← Dashboard
+      </button>
+
+    </div>
+
+
+    <div class="card">
+
+      <h1>New Registration Form</h1>
+
+      <div class="field">
+
+        <label>
+          Form title <span class="required">*</span>
+        </label>
+
+        <input
+          id="formTitle"
+          type="text"
+          placeholder="Semester Elective Registration"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Description
+        </label>
+
+        <textarea
+          id="formDescription"
+          placeholder="Instructions for students..."
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Electives</h2>
+
+      <p class="description">
+        Add each elective and its maximum number of seats.
+      </p>
+
+
+      <div id="electiveRows"></div>
+
+
+      <button
+        class="secondary"
+        id="addElective"
+      >
+        + Add Elective
+      </button>
+
+    </div>
+
+
+    <div id="builderMessage"></div>
+
+
+    <div class="card">
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="createForm"
+        >
+          Create Form
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="shareResult"></div>
+
+  `;
+
+
+  document
+    .getElementById("backButton")
+    .onclick = () => location.reload();
+
+
+  const rows =
+    document.getElementById("electiveRows");
+
+
+  function addRow(name="", capacity=""){
+
+    const row =
+      document.createElement("div");
+
+    row.className = "form-row";
+
+
+    row.innerHTML = `
+
+      <input
+        class="electiveName"
+        type="text"
+        placeholder="Elective name"
+        value="${escapeHtml(name)}"
+      >
+
+
+      <input
+        class="electiveCapacity"
+        type="number"
+        min="1"
+        placeholder="Seats"
+        value="${escapeHtml(capacity)}"
+      >
+
+
+      <button
+        class="danger remove"
+        type="button"
+      >
+        Remove
+      </button>
+
+    `;
+
+
+    row
+      .querySelector(".remove")
+      .onclick = () => row.remove();
+
+
+    rows.appendChild(row);
+
+  }
+
+
+  addRow();
+
+
+  document
+    .getElementById("addElective")
+    .onclick = () => addRow();
+
+
+  document
+    .getElementById("createForm")
+    .onclick = async () => {
+
+      const title =
+        document.getElementById("formTitle").value.trim();
+
+      const description =
+        document.getElementById("formDescription").value.trim();
+
+
+      const electives =
+        Array.from(
+          rows.querySelectorAll(".form-row")
+        ).map(row => ({
+
+          name:
+            row.querySelector(".electiveName").value.trim(),
+
+          capacity:
+            Number(
+              row.querySelector(".electiveCapacity").value
+            )
+
+        })).filter(
+          e => e.name && e.capacity > 0
+        );
+
+
+      if(!title){
+
+        showBuilderError("Please enter a form title.");
+
+        return;
+
+      }
+
+
+      if(electives.length === 0){
+
+        showBuilderError(
+          "Add at least one elective with a seat count."
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById("createForm");
+
+      button.disabled = true;
+
+      button.textContent = "Creating...";
+
+
+      const result =
+        await api("/api/forms", {
+
+          method:"POST",
+
+          body:JSON.stringify({
+            title,
+            description,
+            electives
+          })
+
+        });
+
+
+      if(!result.ok){
+
+        showBuilderError(result.error);
+
+        button.disabled = false;
+
+        button.textContent = "Create Form";
+
+        return;
+
+      }
+
+
+      const link =
+        window.location.origin +
+        "/?form=" +
+        encodeURIComponent(result.formId);
+
+
+      document.getElementById("shareResult").innerHTML = `
+
+        <div class="card">
+
+          <h2>Form Created Successfully 🎉</h2>
+
+          <p class="description">
+            Share this link with your students.
+          </p>
+
+
+          <div class="link-box">
+
+            <input
+              id="shareLink"
+              readonly
+              value="${escapeHtml(link)}"
+            >
+
+            <button
+              class="primary"
+              id="copyLink"
+            >
+              Copy
+            </button>
+
+          </div>
+
+
+          <br>
+
+
+          <div class="actions">
+
+            <button
+              class="primary"
+              onclick="openForm('${result.formId}')"
+            >
+              Open Student Form
+            </button>
+
+
+            <button
+              class="secondary"
+              onclick="location.reload()"
+            >
+              Dashboard
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById("copyLink")
+        .onclick = async () => {
+
+          const linkInput =
+            document.getElementById("shareLink");
+
+          try{
+
+            await navigator.clipboard.writeText(
+              linkInput.value
+            );
+
+            document.getElementById("copyLink")
+              .textContent = "Copied!";
+
+          }catch{
+
+            linkInput.select();
+
+            document.execCommand("copy");
+
+            document.getElementById("copyLink")
+              .textContent = "Copied!";
+
+          }
+
+        };
+
+
+      button.textContent = "Created";
+
+    };
+
+
+  function showBuilderError(message){
+
+    document.getElementById("builderMessage").innerHTML =
+      `<div class="error">${escapeHtml(message)}</div>`;
+
+  }
+
+}
+
+
+/* =========================
+   OPEN FORM
+========================= */
 
 function openForm(id){
- location.href="/?form="+encodeURIComponent(id);
-}
 
-async function csv(id){
- const r=await fetch("/api/forms/"+encodeURIComponent(id)+"/export",{
-  credentials:"same-origin"
- });
- if(!r.ok){alert("Could not download CSV.");return}
- const blob=await r.blob();
- const url=URL.createObjectURL(blob);
- const a=document.createElement("a");
- a.href=url;
- a.download="elective-responses.csv";
- a.click();
- URL.revokeObjectURL(url);
+  window.location.href =
+    "/?form=" +
+    encodeURIComponent(id);
+
 }
 
 
-/* BUILDER */
+/* =========================
+   CSV
+========================= */
 
-function builder(){
- app.innerHTML=`
- <div class="nav">
-  <div class="brand">Create Elective Form</div>
-  <button class="secondary" onclick="location.reload()">← Dashboard</button>
- </div>
+async function downloadCSV(id){
 
- <div class="card">
-  <h1>New Registration Form</h1>
-  <div class="field">
-   <label>Form title <span class="req">*</span></label>
-   <input id="title" placeholder="Semester Elective Registration">
-  </div>
-  <div class="field">
-   <label>Description</label>
-   <textarea id="description" placeholder="Instructions for students..."></textarea>
-  </div>
- </div>
+  try{
 
- <div class="card">
-  <h2>Electives</h2>
-  <p class="desc">Add each elective and its maximum number of seats.</p>
-  <div id="rows"></div>
-  <button class="secondary" id="add">+ Add Elective</button>
- </div>
+    const response =
+      await fetch(
+        "/api/forms/" +
+        encodeURIComponent(id) +
+        "/export",
+        {
+          credentials:"same-origin"
+        }
+      );
 
- <div id="msg"></div>
 
- <div class="card">
-  <button class="primary" id="create">Create Form</button>
- </div>
+    if(!response.ok){
 
- <div id="share"></div>`;
+      alert("Could not download CSV.");
 
- const rows=document.getElementById("rows");
+      return;
 
- function addRow(name="",cap=""){
-  const row=document.createElement("div");
-  row.className="row";
-  row.innerHTML=`
-   <input class="en" placeholder="Elective name" value="${esc(name)}">
-   <input class="ec" type="number" min="1" placeholder="Seats" value="${esc(cap)}">
-   <button class="danger remove">Remove</button>`;
-  row.querySelector(".remove").onclick=()=>row.remove();
-  rows.appendChild(row);
- }
+    }
 
- addRow();
 
- document.getElementById("add").onclick=()=>addRow();
+    const blob =
+      await response.blob();
 
- document.getElementById("create").onclick=async()=>{
-  const title=document.getElementById("title").value.trim();
-  const description=document.getElementById("description").value.trim();
 
-  const electives=[...rows.querySelectorAll(".row")].map(x=>({
-   name:x.querySelector(".en").value.trim(),
-   capacity:Number(x.querySelector(".ec").value)
-  })).filter(x=>x.name&&x.capacity>0);
+    const url =
+      URL.createObjectURL(blob);
 
-  if(!title){
-   document.getElementById("msg").innerHTML=
-    `<div class="error">Please enter a form title.</div>`;
-   return;
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+      "elective-responses.csv";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+  }catch(error){
+
+    alert("Download failed.");
+
   }
 
-  if(!electives.length){
-   document.getElementById("msg").innerHTML=
-    `<div class="error">Add at least one elective with seats.</div>`;
-   return;
-  }
-
-  const b=document.getElementById("create");
-  b.disabled=true;
-  b.textContent="Creating...";
-
-  const r=await api("/api/forms",{
-   method:"POST",
-   body:JSON.stringify({title,description,electives})
-  });
-
-  if(!r.ok){
-   document.getElementById("msg").innerHTML=
-    `<div class="error">${esc(r.error)}</div>`;
-   b.disabled=false;
-   b.textContent="Create Form";
-   return;
-  }
-
-  const link=location.origin+"/?form="+encodeURIComponent(r.formId);
-
-  document.getElementById("share").innerHTML=`
-   <div class="card">
-    <h2>Form Created 🎉</h2>
-    <p class="desc">Send this link to your students.</p>
-    <div class="link">
-     <input id="shareLink" readonly value="${esc(link)}">
-     <button class="primary" id="copy">Copy</button>
-    </div>
-    <br>
-    <button class="primary" onclick="openForm('${r.formId}')">Open Student Form</button>
-    <button class="secondary" onclick="location.reload()">Dashboard</button>
-   </div>`;
-
-  document.getElementById("copy").onclick=async()=>{
-   const input=document.getElementById("shareLink");
-   try{
-    await navigator.clipboard.writeText(input.value);
-   }catch{
-    input.select();
-    document.execCommand("copy");
-   }
-   document.getElementById("copy").textContent="Copied!";
-  };
-
-  b.textContent="Created";
- };
 }
 
 
-/* STUDENT */
+/* =========================
+   STUDENT VIEW
+========================= */
 
-async function student(id){
+async function renderStudent(id){
 
- app.innerHTML=`
-  <div class="bar"></div>
-  <div class="card center"><h2>Loading form...</h2></div>`;
+  app.innerHTML = `
 
- const r=await api("/api/public/forms/"+encodeURIComponent(id));
+    <div class="top-bar"></div>
 
- if(!r.ok){
-  app.innerHTML=`
-   <div class="bar"></div>
-   <div class="card">
-    <h1>Form unavailable</h1>
-    <div class="error">${esc(r.error)}</div>
-   </div>`;
-  return;
- }
-
- let form=r.form;
-
- function draw(){
-  app.innerHTML=`
-   <div class="bar"></div>
-
-   <div class="card first">
-    <h1>${esc(form.title)}</h1>
-    ${form.description?`<p class="desc">${esc(form.description)}</p>`:""}
-   </div>
-
-   <div class="card">
-
-    <div class="field">
-     <label>Student Name <span class="req">*</span></label>
-     <input id="sname" placeholder="Enter your name">
-    </div>
-
-    <div class="field">
-     <label>Register Number <span class="req">*</span></label>
-     <input id="reg" placeholder="Enter register number">
-    </div>
-
-    <div class="field">
-     <label>Email <span class="req">*</span></label>
-     <input id="email" type="email" placeholder="your@email.com">
-    </div>
-
-    <div class="field">
-     <label>Choose Elective <span class="req">*</span></label>
-     <div id="options">
-      ${form.electives.map((e,i)=>{
-       const rem=Number(e.remaining||0);
-       const cap=Number(e.capacity||1);
-       const cls=rem<=0?"full":rem/cap<=.2?"low":"open";
-       const txt=rem<=0?"Full":rem+" left";
-       return `
-        <div class="option">
-         <input type="radio" name="elective" id="e${i}"
-          value="${esc(e.id)}" ${rem<=0?"disabled":""}>
-         <label for="e${i}">${esc(e.name)}</label>
-         <span class="seat ${cls}">${txt}</span>
-        </div>`;
-      }).join("")}
-     </div>
-    </div>
-
-    <div id="msg"></div>
-
-    <button class="primary" id="submit">Submit</button>
-   </div>`;
-
-  document.getElementById("submit").onclick=submit;
- }
-
- async function submit(){
-
-  const name=document.getElementById("sname").value.trim();
-  const reg=document.getElementById("reg").value.trim();
-  const email=document.getElementById("email").value.trim();
-  const chosen=document.querySelector('input[name="elective"]:checked');
-  const msg=document.getElementById("msg");
-
-  if(!name||!reg||!email||!chosen){
-   msg.innerHTML=`<div class="error">Please fill in all fields and choose an elective.</div>`;
-   return;
-  }
-
-  const b=document.getElementById("submit");
-  b.disabled=true;
-  b.textContent="Submitting...";
-
-  const r=await api(
-   "/api/public/forms/"+encodeURIComponent(id)+"/responses",
-   {
-    method:"POST",
-    body:JSON.stringify({
-     name,
-     registerNo:reg,
-     email,
-     electiveId:chosen.value
-    })
-   }
-  );
-
-  if(r.ok){
-   app.innerHTML=`
-    <div class="bar"></div>
     <div class="card center">
-     <div class="check">✓</div>
-     <h1>Registration Successful</h1>
-     <p class="desc">${esc(r.message)}</p>
-     <p>Your response has been recorded.</p>
-    </div>`;
-  }else{
-   msg.innerHTML=`<div class="error">${esc(r.error)}</div>`;
-   b.disabled=false;
-   b.textContent="Submit";
-   refresh();
+
+      <h2>Loading form...</h2>
+
+    </div>
+
+  `;
+
+
+  const result =
+    await api(
+      "/api/public/forms/" +
+      encodeURIComponent(id)
+    );
+
+
+  if(!result.ok){
+
+    app.innerHTML = `
+
+      <div class="top-bar"></div>
+
+      <div class="card">
+
+        <h1>Form unavailable</h1>
+
+        <div class="error">
+          ${escapeHtml(result.error)}
+        </div>
+
+      </div>
+
+    `;
+
+    return;
+
   }
- }
 
- async function refresh(){
-  const latest=await api(
-   "/api/public/forms/"+encodeURIComponent(id)
-  );
-  if(!latest.ok)return;
 
-  form=latest.form;
+  let form = result.form;
 
-  form.electives.forEach(e=>{
-   const radio=document.querySelector(
-    `input[name="elective"][value="${e.id}"]`
-   );
-   if(!radio)return;
 
-   const option=radio.closest(".option");
-   const seat=option.querySelector(".seat");
-   const rem=Number(e.remaining||0);
-   const cap=Number(e.capacity||1);
+  function renderForm(){
 
-   seat.textContent=rem<=0?"Full":rem+" left";
-   seat.className="seat "+
-    (rem<=0?"full":rem/cap<=.2?"low":"open");
+    app.innerHTML = `
 
-   radio.disabled=rem<=0;
-  });
- }
+      <div class="top-bar"></div>
 
- draw();
 
- setInterval(refresh,5000);
+      <div class="card main-card">
+
+        <h1>
+          ${escapeHtml(form.title)}
+        </h1>
+
+        ${
+          form.description
+          ?
+          `<p class="description">
+            ${escapeHtml(form.description)}
+          </p>`
+          :
+          ""
+        }
+
+      </div>
+
+
+      <div class="card">
+
+        <div class="field">
+
+          <label>
+            Student Name
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="studentName"
+            type="text"
+            placeholder="Enter your name"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Register Number
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="registerNo"
+            type="text"
+            placeholder="Enter register number"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Email
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="studentEmail"
+            type="email"
+            placeholder="your@email.com"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Choose Elective
+            <span class="required">*</span>
+          </label>
+
+
+          <div id="electiveOptions">
+
+            ${
+              form.electives.map((el,index)=>{
+
+                let remaining =
+                  Number(el.remaining || 0);
+
+                let capacity =
+                  Number(el.capacity || 1);
+
+                let percent =
+                  remaining / capacity;
+
+
+                let className =
+                  remaining <= 0
+                  ? "full"
+                  : percent <= .2
+                  ? "almost"
+                  : "available";
+
+
+                let text =
+                  remaining <= 0
+                  ? "Full"
+                  : remaining + " left";
+
+
+                return `
+
+                  <div class="option">
+
+                    <input
+                      type="radio"
+                      name="elective"
+                      id="elective${index}"
+                      value="${escapeHtml(el.id)}"
+                      ${remaining <= 0 ? "disabled" : ""}
+                    >
+
+
+                    <label
+                      for="elective${index}"
+                    >
+                      ${escapeHtml(el.name)}
+                    </label>
+
+
+                    <span
+                      class="seats ${className}"
+                    >
+                      ${text}
+                    </span>
+
+                  </div>
+
+                `;
+
+              }).join("")
+
+            }
+
+          </div>
+
+        </div>
+
+
+        <div id="studentMessage"></div>
+
+
+        <div class="actions">
+
+          <button
+            class="primary"
+            id="submitResponse"
+          >
+            Submit
+          </button>
+
+        </div>
+
+      </div>
+
+    `;
+
+
+    document
+      .getElementById("submitResponse")
+      .onclick = submitResponse;
+
+  }
+
+
+  async function submitResponse(){
+
+    const name =
+      document.getElementById("studentName")
+      .value.trim();
+
+
+    const registerNo =
+      document.getElementById("registerNo")
+      .value.trim();
+
+
+    const email =
+      document.getElementById("studentEmail")
+      .value.trim();
+
+
+    const selected =
+      document.querySelector(
+        'input[name="elective"]:checked'
+      );
+
+
+    const message =
+      document.getElementById("studentMessage");
+
+
+    if(!name || !registerNo || !email || !selected){
+
+      message.innerHTML =
+        `<div class="error">
+          Please fill in all fields and choose an elective.
+        </div>`;
+
+      return;
+
+    }
+
+
+    const button =
+      document.getElementById("submitResponse");
+
+    button.disabled = true;
+
+    button.textContent = "Submitting...";
+
+
+    const result =
+      await api(
+        "/api/public/forms/" +
+        encodeURIComponent(id) +
+        "/responses",
+        {
+
+          method:"POST",
+
+          body:JSON.stringify({
+
+            name,
+            registerNo,
+            email,
+            electiveId:selected.value
+
+          })
+
+        }
+      );
+
+
+    if(result.ok){
+
+      app.innerHTML = `
+
+        <div class="top-bar"></div>
+
+        <div class="card confirm">
+
+          <div class="check">
+            ✓
+          </div>
+
+          <h1>
+            Registration Successful
+          </h1>
+
+          <p class="description">
+            ${escapeHtml(result.message)}
+          </p>
+
+          <p>
+            Your response has been recorded.
+          </p>
+
+        </div>
+
+      `;
+
+    }else{
+
+      message.innerHTML =
+        `<div class="error">
+          ${escapeHtml(result.error)}
+        </div>`;
+
+      button.disabled = false;
+
+      button.textContent = "Submit";
+
+      await refreshSeats();
+
+    }
+
+  }
+
+
+  async function refreshSeats(){
+
+    const latest =
+      await api(
+        "/api/public/forms/" +
+        encodeURIComponent(id)
+      );
+
+
+    if(latest.ok){
+
+      form = latest.form;
+
+      renderForm();
+
+    }
+
+  }
+
+
+  renderForm();
+
+
+  /*
+    Refresh seat counts every 5 seconds.
+    This doesn't submit anything automatically.
+  */
+
+  setInterval(async()=>{
+
+    const latest =
+      await api(
+        "/api/public/forms/" +
+        encodeURIComponent(id)
+      );
+
+
+    if(latest.ok){
+
+      form = latest.form;
+
+      /*
+        Only update the seat labels so that
+        students don't lose what they typed.
+      */
+
+      latest.form.electives.forEach(el=>{
+
+        const radio =
+          document.querySelector(
+            `input[name="elective"][value="${el.id}"]`
+          );
+
+        if(!radio) return;
+
+        const option =
+          radio.closest(".option");
+
+        const seat =
+          option.querySelector(".seats");
+
+        const remaining =
+          Number(el.remaining || 0);
+
+        const capacity =
+          Number(el.capacity || 1);
+
+        seat.textContent =
+          remaining <= 0
+          ? "Full"
+          : remaining + " left";
+
+
+        seat.className =
+          "seats " +
+          (
+            remaining <= 0
+            ? "full"
+            : remaining / capacity <= .2
+            ? "almost"
+            : "available"
+          );
+
+
+        radio.disabled =
+          remaining <= 0;
+
+      });
+
+    }
+
+  },5000);
+
 }
 
 </script>
+
 </body>
-  </html>
+</html>
