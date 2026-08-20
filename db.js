@@ -1,46 +1,69 @@
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.json');
+// Simple JSON database for the Elective Registration app.
+// The file data.json is created automatically in this same folder.
+const DB_FILE = path.join(__dirname, 'data.json');
 
-function emptyData() {
-  return { teachers: [], forms: [], responses: [] };
+const DEFAULT_DATA = {
+  teachers: [],
+  forms: [],
+  responses: [],
+  studentFields: {
+    name: true,
+    registerNo: true,
+    email: true,
+    department: true
+  }
+};
+
+let writeQueue = Promise.resolve();
+
+function cloneDefault() {
+  return JSON.parse(JSON.stringify(DEFAULT_DATA));
+}
+
+function ensureDb() {
+  if (!fs.existsSync(DB_FILE)) {
+    fs.writeFileSync(DB_FILE, JSON.stringify(DEFAULT_DATA, null, 2), 'utf8');
+  }
 }
 
 function load() {
+  ensureDb();
   try {
-    const raw = fs.readFileSync(DB_PATH, 'utf8');
+    const raw = fs.readFileSync(DB_FILE, 'utf8');
     const data = JSON.parse(raw);
-    if (!data.teachers) data.teachers = [];
-    if (!data.forms) data.forms = [];
-    if (!data.responses) data.responses = [];
-    return data;
+    return {
+      teachers: Array.isArray(data.teachers) ? data.teachers : [],
+      forms: Array.isArray(data.forms) ? data.forms : [],
+      responses: Array.isArray(data.responses) ? data.responses : [],
+      studentFields: data.studentFields || cloneDefault().studentFields
+    };
   } catch (err) {
-    if (err.code === 'ENOENT') {
-      const fresh = emptyData();
-      save(fresh);
-      return fresh;
-    }
-    throw err;
+    console.error('Database read error:', err.message);
+    return cloneDefault();
   }
 }
 
 function save(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+  ensureDb();
+  const tempFile = DB_FILE + '.tmp';
+  fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf8');
+  fs.renameSync(tempFile, DB_FILE);
 }
 
-// Simple in-process mutex so concurrent requests never read-modify-write
-// the JSON file at the same time and clobber each other's changes.
-let queue = Promise.resolve();
-
-function withLock(fn) {
-  const run = queue.then(async () => {
-    const data = load();
-    return fn(data);
-  });
-  // Keep the queue moving even if fn() throws, so later callers aren't stuck.
-  queue = run.then(() => {}, () => {});
+function withLock(task) {
+  const run = writeQueue.then(() => task(load()));
+  writeQueue = run.catch(() => {});
   return run;
 }
 
-module.exports = { load, save, withLock };
+ensureDb();
+
+module.exports = {
+  DB_FILE,
+  load,
+  save,
+  withLock
+};
