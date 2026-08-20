@@ -45,9 +45,14 @@ app.post('/api/signup', async (req, res) => {
   const email = String(req.body.email || '').trim().toLowerCase();
   const password = String(req.body.password || '');
   const name = String(req.body.name || '').trim();
+  const securityQuestion = String(req.body.securityQuestion || '').trim();
+  const securityAnswer = String(req.body.securityAnswer || '').trim();
 
   if (!email || !password || password.length < 6) {
     return res.status(400).json({ ok: false, error: 'Enter a valid email and a password of at least 6 characters.' });
+  }
+  if (!securityQuestion || !securityAnswer) {
+    return res.status(400).json({ ok: false, error: 'Add a security question and answer for password recovery.' });
   }
 
   try {
@@ -57,7 +62,16 @@ app.post('/api/signup', async (req, res) => {
       }
       const id = uuidv4();
       const passwordHash = await bcrypt.hash(password, 10);
-      data.teachers.push({ id, email, name: name || email.split('@')[0], passwordHash, createdAt: new Date().toISOString() });
+      const securityAnswerHash = await bcrypt.hash(securityAnswer.toLowerCase(), 10);
+      data.teachers.push({
+        id,
+        email,
+        name: name || email.split('@')[0],
+        passwordHash,
+        securityQuestion,
+        securityAnswerHash,
+        createdAt: new Date().toISOString()
+      });
       require('./db').save(data);
       return id;
     });
@@ -96,6 +110,44 @@ app.get('/api/me', (req, res) => {
   res.json({ ok: true, teacher: teacher ? { id: teacher.id, email: teacher.email, name: teacher.name } : null });
 });
 
+/* ---- Forgot password: look up security question, then verify + reset ---- */
+
+app.post('/api/forgot-password/question', (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const data = require('./db').load();
+  const teacher = data.teachers.find(t => t.email === email);
+  if (!teacher) {
+    return res.status(400).json({ ok: false, error: 'No account with that email.' });
+  }
+  res.json({ ok: true, question: teacher.securityQuestion });
+});
+
+app.post('/api/forgot-password/reset', async (req, res) => {
+  const email = String(req.body.email || '').trim().toLowerCase();
+  const answer = String(req.body.answer || '').trim().toLowerCase();
+  const newPassword = String(req.body.newPassword || '');
+
+  if (!newPassword || newPassword.length < 6) {
+    return res.status(400).json({ ok: false, error: 'New password must be at least 6 characters.' });
+  }
+
+  try {
+    await withLock(async (data) => {
+      const teacher = data.teachers.find(t => t.email === email);
+      if (!teacher) throw new Error('No account with that email.');
+
+      const match = await bcrypt.compare(answer, teacher.securityAnswerHash);
+      if (!match) throw new Error('That answer does not match what we have on file.');
+
+      teacher.passwordHash = await bcrypt.hash(newPassword, 10);
+      require('./db').save(data);
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(400).json({ ok: false, error: err.message });
+  }
+});
+
 /* ---------------------- TEACHER: FORMS ---------------------- */
 
 app.post('/api/forms', requireAuth, async (req, res) => {
@@ -127,6 +179,7 @@ app.post('/api/forms', requireAuth, async (req, res) => {
       collegeName,
       department,
       electives,
+      closed: false,
       createdAt: new Date().toISOString()
     });
     require('./db').save(data);
@@ -149,6 +202,7 @@ app.get('/api/forms', requireAuth, (req, res) => {
       description: f.description,
       collegeName: f.collegeName || '',
       department: f.department || '',
+      closed: !!f.closed,
       createdAt: f.createdAt,
       totalTaken,
       totalCapacity
@@ -165,9 +219,9 @@ app.get('/api/forms/:id/export', requireAuth, (req, res) => {
   const rows = data.responses.filter(r => r.formId === form.id);
   const electiveNameById = Object.fromEntries(form.electives.map(el => [el.id, el.name]));
 
-  const csvLines = ['Timestamp,Student Name,Register Number,Elective,Email'];
+  const csvLines = ['Timestamp,Student Name,Register Number,Department,Elective,Email'];
   rows.forEach(r => {
-    const line = [r.createdAt, r.name, r.registerNo, electiveNameById[r.electiveId] || '', r.email]
+    const line = [r.createdAt, r.name, r.registerNo, r.department || '', electiveNameById[r.electiveId] || '', r.email]
       .map(v => `"${String(v).replace(/"/g, '""')}"`)
       .join(',');
     csvLines.push(line);
@@ -176,6 +230,57 @@ app.get('/api/forms/:id/export', requireAuth, (req, res) => {
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', `attachment; filename="${form.title.replace(/[^a-z0-9]/gi, '_')}_responses.csv"`);
   res.send(csvLines.join('\n'));
+});
+
+app.get('/api/forms/:id/responses', requireAuth, (req, res) => {
+  const data = require('./db').load();
+  const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
+  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
+
+  const electiveNameById = Object.fromEntries(form.electives.map(el => [el.id, el.name]));
+  const rows = data.responses
+    .filter(r => r.formId === form.id)
+    .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+    .map(r => ({
+      name: r.name,
+      registerNo: r.registerNo,
+      department: r.department || '',
+      email: r.email,
+      elective: electiveNameById[r.electiveId] || '(removed elective)',
+      createdAt: r.createdAt
+    }));
+
+  res.json({ ok: true, responses: rows });
+});
+
+app.patch('/api/forms/:id', requireAuth, async (req, res) => {
+  try {
+    const updated = await withLock(async (data) => {
+      const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
+      if (!form) throw new Error('Form not found.');
+      if (typeof req.body.closed === 'boolean') form.closed = req.body.closed;
+      require('./db').save(data);
+      return form;
+    });
+    res.json({ ok: true, closed: !!updated.closed });
+  } catch (err) {
+    res.status(404).json({ ok: false, error: err.message });
+  }
+});
+
+app.delete('/api/forms/:id', requireAuth, async (req, res) => {
+  try {
+    await withLock(async (data) => {
+      const idx = data.forms.findIndex(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
+      if (idx === -1) throw new Error('Form not found.');
+      data.forms.splice(idx, 1);
+      data.responses = data.responses.filter(r => r.formId !== req.params.id);
+      require('./db').save(data);
+    });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(404).json({ ok: false, error: err.message });
+  }
 });
 
 /* ---------------------- PUBLIC: STUDENT VIEW ---------------------- */
@@ -194,6 +299,7 @@ app.get('/api/public/forms/:id', (req, res) => {
       description: form.description,
       collegeName: form.collegeName || '',
       department: form.department || '',
+      closed: !!form.closed,
       electives: status
     }
   });
@@ -203,10 +309,11 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
   const formId = req.params.id;
   const name = String(req.body.name || '').trim();
   const registerNo = String(req.body.registerNo || '').trim();
+  const department = String(req.body.department || '').trim();
   const email = String(req.body.email || '').trim();
   const electiveId = String(req.body.electiveId || '').trim();
 
-  if (!name || !registerNo || !email || !electiveId) {
+  if (!name || !registerNo || !department || !email || !electiveId) {
     return res.status(400).json({ ok: false, error: 'All fields are required.' });
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -218,6 +325,7 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
     const message = await withLock(async (data) => {
       const form = data.forms.find(f => f.id === formId);
       if (!form) throw new Error('This form does not exist or was removed.');
+      if (form.closed) throw new Error('This form is closed and no longer accepting responses.');
 
       const alreadyRegistered = data.responses.some(
         r => r.formId === formId && r.registerNo.toLowerCase() === registerNo.toLowerCase()
@@ -237,6 +345,7 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
         electiveId,
         name,
         registerNo,
+        department,
         email,
         createdAt: new Date().toISOString()
       });
@@ -249,7 +358,12 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
   }
 });
 
-// Any non-API route falls through to the single-page app
+// Unknown API routes get a proper JSON 404 instead of silently returning the HTML page
+app.use('/api', (req, res) => {
+  res.status(404).json({ ok: false, error: 'Not found.' });
+});
+
+// Any other route falls through to the single-page app
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
