@@ -855,8 +855,12 @@ async function renderStudentView(formId){
       <input class="field-input" id="sRegNo" type="text" required>
     </div>
     <div class="card question">
-      <p class="q-label">Your department<span class="required">*</span></p>
+      <p class="q-label">department<span class="required">*</span></p>
       <input class="field-input" id="sDept" type="text" placeholder="e.g. Computer Science" required>
+    </div>
+    <div class="card question">
+      <p class="q-label">Email<span class="required">*</span></p>
+      <input class="field-input narrow" id="sEmail" type="email" required>
     </div>
     ${form.questions.map(q => `
       <div class="card question">
@@ -864,10 +868,7 @@ async function renderStudentView(formId){
         ${questionCardHtml(q)}
       </div>
     `).join('')}
-    <div class="card question">
-      <p class="q-label">Email<span class="required">*</span></p>
-      <input class="field-input narrow" id="sEmail" type="email" required>
-    </div>
+    
     <div class="banner" id="studentBanner"></div>
     <div class="actions-row">
       <button class="btn btn-primary" id="submitBtn">Submit</button>
