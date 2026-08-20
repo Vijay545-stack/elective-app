@@ -3,9 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Create elective registration forms with live seat limits and shareable links.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23673ab7'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif'%3EE%3C/text%3E%3C/svg%3E">
-<title>Elective Registration</title>
+<meta name="description" content="Build forms and quizzes with short answer, multiple choice, checkboxes, dropdowns, and seat-limited elective picks.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23673ab7'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif'%3EF%3C/text%3E%3C/svg%3E">
+<title>Form Builder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
 <style>
@@ -25,11 +25,12 @@
   .title-input,.desc-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 0; font-family:'Google Sans','Roboto',sans-serif; background:transparent; color:var(--text);}
   .title-input{font-size:28px; font-weight:400; margin-bottom:8px;}
   .desc-input{font-size:14px; color:var(--muted); resize:vertical; min-height:40px;}
-  .title-input:focus,.desc-input:focus,input:focus,textarea:focus{outline:none; border-bottom:2px solid var(--purple);}
+  .title-input:focus,.desc-input:focus,input:focus,textarea:focus,select:focus{outline:none; border-bottom:2px solid var(--purple);}
   .q-label{font-size:15px; margin-bottom:12px;}
   .required{color:var(--red); margin-left:2px;}
-  .field-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 2px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text);}
+  .field-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 2px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text); background:transparent;}
   .field-input.narrow{max-width:400px;}
+  select.field-input{background:transparent; -webkit-appearance:none; appearance:none;}
   .elective-row{display:flex; gap:12px; align-items:center; margin-bottom:14px;}
   .elective-row .field-input{flex:1;}
   .elective-row .vacancy-input{width:110px; flex:none;}
@@ -45,7 +46,7 @@
   .btn-text{background:none; color:var(--purple);}
   .option{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f1f1f1;}
   .option:last-child{border-bottom:none;}
-  .option input[type=radio]{accent-color:var(--purple); width:18px; height:18px;}
+  .option input[type=radio],.option input[type=checkbox]{accent-color:var(--purple); width:18px; height:18px;}
   .option label{flex:1; font-size:14px; cursor:pointer;}
   .seat-tag{font-size:12px; font-family:'Roboto Mono',monospace; padding:2px 8px; border-radius:10px; white-space:nowrap;}
   .seat-open{color:var(--green); background:#e6f4ea;}
@@ -63,6 +64,7 @@
   .banner.ok{background:#e6f4ea; color:var(--green); border:1px solid var(--green);}
   .confirm{text-align:center; padding:40px 20px;}
   .confirm .check{font-size:40px; color:var(--green); margin-bottom:12px;}
+  .confirm .score-box{margin-top:14px; display:inline-block; padding:10px 20px; border-radius:20px; background:#f3edfb; color:var(--purple); font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:16px;}
   .topnav{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
   .topnav .brand{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; color:var(--purple);}
   .topnav .who{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:10px;}
@@ -71,42 +73,41 @@
   .form-list-item:last-child{border-bottom:none;}
   .form-list-title{font-family:'Google Sans','Roboto',sans-serif; font-size:16px;}
   .form-list-meta{font-size:12px; color:var(--muted); margin-top:2px;}
-  .row-actions{display:flex; gap:14px; align-items:center;}
+  .row-actions{display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
   .auth-toggle{font-size:13px; color:var(--muted); margin-top:16px; text-align:center;}
   .auth-toggle a{color:var(--purple); cursor:pointer;}
   .empty-state{color:var(--muted); font-size:14px; padding:12px 0;}
 
-  /* institutional header (student view) */
-  .inst-header{
-    display:flex; align-items:center; gap:14px;
-    margin-bottom:14px;
-  }
-  .inst-crest{
-    width:48px; height:48px; border-radius:50%;
-    background:linear-gradient(135deg, var(--purple), #9575cd);
-    color:#fff; display:flex; align-items:center; justify-content:center;
-    font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px;
-    flex-shrink:0;
-  }
-  .inst-text .inst-college{
-    font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:16px; color:var(--text);
-    line-height:1.25;
-  }
-  .inst-text .inst-dept{
-    font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase;
-  }
+  .inst-header{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
+  .inst-crest{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--purple), #9575cd); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; flex-shrink:0;}
+  .inst-text .inst-college{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:16px; color:var(--text); line-height:1.25;}
+  .inst-text .inst-dept{font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase;}
   .field-row-pair{display:flex; gap:20px;}
   .field-row-pair > div{flex:1;}
   @media (max-width:600px){ .field-row-pair{flex-direction:column; gap:0;} }
-  .responses-panel{
-    background:#faf9fc; border:1px solid var(--line); border-top:none;
-    padding:14px; margin:-20px 0 24px;
-  }
-  .pw-toggle{
-    position:absolute; right:2px; top:50%; transform:translateY(-50%);
-    background:none; border:none; color:var(--purple); font-size:12px;
-    font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; padding:6px 4px;
-  }
+  .responses-panel{background:#faf9fc; border:1px solid var(--line); border-top:none; padding:14px; margin:-20px 0 24px;}
+  .pw-toggle{position:absolute; right:2px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--purple); font-size:12px; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; padding:6px 4px;}
+
+  /* --- question builder --- */
+  .q-card{border:1px solid var(--line); border-left:4px solid var(--purple); border-radius:6px; padding:18px; margin-bottom:16px; background:#fff;}
+  .q-card-head{display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;}
+  .q-card-head .q-label-input{flex:1;}
+  .q-type-select{width:180px; flex:none; border:1px solid var(--line); border-radius:4px; padding:9px 8px; font-size:13px; font-family:'Roboto',sans-serif; color:var(--text); background:#fff;}
+  .q-opts{margin-top:6px;}
+  .q-opt-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
+  .q-opt-row .opt-text{flex:1;}
+  .q-opt-row .opt-capacity{width:90px; flex:none;}
+  .q-opt-row .opt-correct{flex:none; width:18px; height:18px; accent-color:var(--green);}
+  .q-card-foot{display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #f1f1f1; padding-top:12px; flex-wrap:wrap; gap:10px;}
+  .q-card-foot .left-controls{display:flex; align-items:center; gap:16px; font-size:13px; color:var(--muted); flex-wrap:wrap;}
+  .q-card-foot label{display:flex; align-items:center; gap:6px; cursor:pointer;}
+  .points-input{width:56px; border:none; border-bottom:1px solid var(--line); padding:4px 2px; font-size:13px; text-align:center;}
+  .remove-q{background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px;}
+  .remove-q:hover{color:var(--red);}
+  .type-badge{display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; background:#f3edfb; color:var(--purple); margin-left:8px; vertical-align:middle;}
+  .quiz-toggle{display:flex; align-items:center; gap:10px; font-size:14px; margin-top:2px;}
+  .quiz-toggle input{width:18px; height:18px; accent-color:var(--purple);}
+  .correct-hint{font-size:12px; color:var(--muted); margin-top:2px;}
 </style>
 </head>
 <body>
@@ -116,6 +117,16 @@
 const app = document.getElementById('app');
 const params = new URLSearchParams(window.location.search);
 const formIdInUrl = params.get('form');
+
+const QUESTION_TYPES = [
+  { value: 'short_answer', label: 'Short answer' },
+  { value: 'paragraph', label: 'Paragraph' },
+  { value: 'multiple_choice', label: 'Multiple choice' },
+  { value: 'checkboxes', label: 'Checkboxes' },
+  { value: 'dropdown', label: 'Dropdown' },
+  { value: 'elective', label: 'Elective (seat-limited)' }
+];
+const CHOICE_TYPES = ['multiple_choice', 'checkboxes', 'dropdown', 'elective'];
 
 function escapeHtml(str){
   const d = document.createElement('div');
@@ -176,7 +187,7 @@ function renderAuth(mode='login'){
     <div class="top-bar"></div>
     <div class="card">
       <h1 class="static-title">${isLogin ? 'Teacher login' : 'Create a teacher account'}</h1>
-      <p class="static-desc">${isLogin ? 'Log in to create and manage elective registration forms.' : 'One-time signup — after this you never touch any setup again.'}</p>
+      <p class="static-desc">${isLogin ? 'Log in to create and manage forms and quizzes.' : 'One-time signup — after this you never touch any setup again.'}</p>
     </div>
     <div class="card question">
       ${!isLogin ? `<div style="margin-bottom:18px;"><p class="q-label">Your name</p><input class="field-input narrow" id="authName" type="text"></div>` : ''}
@@ -345,13 +356,13 @@ function renderForgotPasswordReset(email, question){
 async function renderDashboard(teacher){
   app.innerHTML = `
     <div class="topnav">
-      <span class="brand">Elective Registration</span>
+      <span class="brand">Form Builder</span>
       <span class="who">${escapeHtml(teacher.name)} &middot; <a class="link-plain" id="logoutLink">Log out</a></span>
     </div>
     <div class="top-bar"></div>
     <div class="card">
       <h1 class="static-title">Your forms</h1>
-      <p class="static-desc">Create a form, share its link with students, watch seats fill up live.</p>
+      <p class="static-desc">Build a form or quiz, share its link, and watch responses come in live.</p>
     </div>
     <div class="card question">
       <div id="formListWrap"><p class="empty-state">Loading…</p></div>
@@ -376,10 +387,14 @@ async function renderDashboard(teacher){
     return `
       <div class="form-list-item" data-form-id="${f.id}">
         <div>
-          <div class="form-list-title">${escapeHtml(f.title)} ${f.closed ? '<span class="seat-tag seat-full" style="margin-left:6px;">Closed</span>' : ''}</div>
+          <div class="form-list-title">
+            ${escapeHtml(f.title)}
+            ${f.isQuiz ? '<span class="type-badge">Quiz</span>' : ''}
+            ${f.closed ? '<span class="seat-tag seat-full" style="margin-left:6px;">Closed</span>' : ''}
+          </div>
           <div class="form-list-meta">
             ${[f.department, f.collegeName].filter(Boolean).join(' · ')}
-            ${f.department || f.collegeName ? ' &middot; ' : ''}${f.totalTaken}/${f.totalCapacity} seats filled
+            ${f.department || f.collegeName ? ' &middot; ' : ''}${f.questionCount} question${f.questionCount === 1 ? '' : 's'} &middot; ${f.responseCount} response${f.responseCount === 1 ? '' : 's'}
           </div>
         </div>
         <div class="row-actions">
@@ -409,6 +424,7 @@ async function renderDashboard(teacher){
         panel.innerHTML = '<p class="empty-state">No responses yet.</p>';
         return;
       }
+      const questionLabels = result.form.questions.map(q => q.label);
       panel.innerHTML = `
         <div style="overflow-x:auto;">
           <table style="width:100%; border-collapse:collapse; font-size:13px;">
@@ -417,20 +433,26 @@ async function renderDashboard(teacher){
                 <th style="padding:8px 6px;">Name</th>
                 <th style="padding:8px 6px;">Register No.</th>
                 <th style="padding:8px 6px;">Department</th>
-                <th style="padding:8px 6px;">Elective</th>
                 <th style="padding:8px 6px;">Email</th>
+                ${questionLabels.map(l => `<th style="padding:8px 6px;">${escapeHtml(l)}</th>`).join('')}
+                ${result.form.isQuiz ? '<th style="padding:8px 6px;">Score</th>' : ''}
               </tr>
             </thead>
             <tbody>
-              ${result.responses.map(r => `
+              ${result.responses.map(r => {
+                const byLabel = {};
+                r.answers.forEach(a => { byLabel[a.label] = a.value; });
+                return `
                 <tr style="border-bottom:1px solid #f1f1f1;">
                   <td style="padding:8px 6px;">${escapeHtml(r.name)}</td>
                   <td style="padding:8px 6px;">${escapeHtml(r.registerNo)}</td>
                   <td style="padding:8px 6px;">${escapeHtml(r.department)}</td>
-                  <td style="padding:8px 6px;">${escapeHtml(r.elective)}</td>
                   <td style="padding:8px 6px;">${escapeHtml(r.email)}</td>
+                  ${questionLabels.map(l => `<td style="padding:8px 6px;">${escapeHtml(byLabel[l] || '')}</td>`).join('')}
+                  ${result.form.isQuiz ? `<td style="padding:8px 6px;">${r.score ?? ''}/${r.maxScore ?? ''}</td>` : ''}
                 </tr>
-              `).join('')}
+              `;
+              }).join('')}
             </tbody>
           </table>
         </div>
@@ -468,20 +490,25 @@ async function renderDashboard(teacher){
    TEACHER: BUILD FORM VIEW
 ============================================================ */
 function renderBuilder(teacher){
-  let electiveCount = 0;
+  let qCount = 0;
+  const questionsEl_placeholder = null;
 
   app.innerHTML = `
     <div class="topnav">
-      <span class="brand">Elective Registration</span>
+      <span class="brand">Form Builder</span>
       <span class="who"><a class="link-plain" id="backLink">&larr; Back to your forms</a></span>
     </div>
     <div class="top-bar"></div>
     <div class="card">
-      <input class="title-input" id="formTitle" placeholder="Untitled form" value="Elective Registration">
+      <input class="title-input" id="formTitle" placeholder="Untitled form" value="Untitled form">
       <textarea class="desc-input" id="formDesc" rows="2" placeholder="Form description (shown to students)"></textarea>
+      <div class="quiz-toggle">
+        <input type="checkbox" id="isQuizToggle">
+        <label for="isQuizToggle">Make this a quiz (auto-graded, correct answers marked below)</label>
+      </div>
     </div>
     <div class="card question">
-      <p class="q-label" style="font-weight:500;">College &amp; department</p>
+      <p class="q-label" style="font-weight:500;">College &amp; department <span style="font-weight:400; color:var(--muted);">(optional)</span></p>
       <div class="field-row-pair">
         <div>
           <p class="q-label">College / institution name</p>
@@ -492,13 +519,11 @@ function renderBuilder(teacher){
           <input class="field-input" id="formDept" type="text" placeholder="e.g. Computer Science">
         </div>
       </div>
+      <p class="hint">Every form always collects the student's name, register number, department, and email automatically — no need to add those as questions.</p>
     </div>
-    <div class="card question">
-      <p class="q-label" style="font-weight:500;">Electives &amp; seat count</p>
-      <div id="electiveRows"></div>
-      <button type="button" class="add-row-btn" id="addRowBtn">+ Add elective</button>
-    </div>
-    <div class="banner" id="builderBanner"></div>
+    <div id="questionsWrap"></div>
+    <button type="button" class="add-row-btn" id="addQBtn">+ Add question</button>
+    <div class="banner" id="builderBanner" style="margin-top:20px;"></div>
     <div class="actions-row">
       <button class="btn btn-primary" id="createBtn">Create form</button>
     </div>
@@ -507,22 +532,105 @@ function renderBuilder(teacher){
 
   document.getElementById('backLink').addEventListener('click', () => renderDashboard(teacher));
 
-  const rowsEl = document.getElementById('electiveRows');
-  function addRow(name='', capacity=''){
-    electiveCount++;
-    const row = document.createElement('div');
-    row.className = 'elective-row';
-    row.innerHTML = `
-      <input class="field-input elective-name" type="text" placeholder="Elective name" value="${escapeHtml(name)}">
-      <input class="field-input vacancy-input" type="number" min="1" placeholder="Seats" value="${escapeHtml(capacity)}">
-      <button type="button" class="remove-row" title="Remove">&times;</button>
+  const questionsWrap = document.getElementById('questionsWrap');
+  const isQuizToggle = document.getElementById('isQuizToggle');
+  isQuizToggle.addEventListener('change', () => {
+    questionsWrap.querySelectorAll('.q-card').forEach(card => refreshQuestionCard(card));
+  });
+
+  function optionRowHtml(text='', capacity='', correct=false){
+    return `
+      <div class="q-opt-row" data-opt-row>
+        <input type="checkbox" class="opt-correct correct-only" ${correct ? 'checked' : ''} title="Mark as correct answer" style="display:none;">
+        <input class="field-input opt-text" type="text" placeholder="Option" value="${escapeHtml(text)}">
+        <input class="field-input opt-capacity elective-only" type="number" min="1" placeholder="Seats" value="${escapeHtml(capacity)}" style="display:none;">
+        <button type="button" class="remove-row" data-remove-opt title="Remove">&times;</button>
+      </div>
     `;
-    row.querySelector('.remove-row').addEventListener('click', () => row.remove());
-    rowsEl.appendChild(row);
   }
-  addRow('Data Structures', 30);
-  addRow('Web Development', 30);
-  document.getElementById('addRowBtn').addEventListener('click', () => addRow());
+
+  function refreshQuestionCard(card){
+    const type = card.querySelector('.q-type-select').value;
+    const isChoice = CHOICE_TYPES.includes(type);
+    const isElective = type === 'elective';
+    const isQuiz = isQuizToggle.checked;
+
+    card.querySelector('.q-opts').style.display = isChoice ? 'block' : 'none';
+    card.querySelectorAll('.elective-only').forEach(el => el.style.display = isElective ? '' : 'none');
+    card.querySelectorAll('.correct-only').forEach(el => el.style.display = (isQuiz && isChoice && !isElective) ? '' : 'none');
+    const pointsWrap = card.querySelector('.points-wrap');
+    pointsWrap.style.display = (isQuiz && isChoice && !isElective) ? 'flex' : 'none';
+    const correctHint = card.querySelector('.correct-hint');
+    correctHint.style.display = (isQuiz && isChoice && !isElective) ? 'block' : 'none';
+
+    // Multiple choice / dropdown = single correct answer (radio-like), checkboxes = multiple.
+    card.querySelectorAll('.opt-correct').forEach(cb => {
+      cb.dataset.multi = type === 'checkboxes' ? '1' : '0';
+    });
+  }
+
+  function addQuestion(type='short_answer', label='', required=true, options=[]){
+    qCount++;
+    const card = document.createElement('div');
+    card.className = 'q-card';
+    card.innerHTML = `
+      <div class="q-card-head">
+        <input class="field-input q-label-input" type="text" placeholder="Question" value="${escapeHtml(label)}">
+        <select class="q-type-select">
+          ${QUESTION_TYPES.map(t => `<option value="${t.value}" ${t.value === type ? 'selected' : ''}>${t.label}</option>`).join('')}
+        </select>
+      </div>
+      <div class="q-opts">
+        <div class="opt-rows"></div>
+        <button type="button" class="add-row-btn add-opt-btn" style="margin-top:0; padding:6px 14px; font-size:13px;">+ Add option</button>
+        <p class="hint correct-hint" style="display:none;">Check the box next to correct option(s). Points are earned only for a fully correct answer.</p>
+      </div>
+      <div class="q-card-foot">
+        <div class="left-controls">
+          <label><input type="checkbox" class="q-required" checked> Required</label>
+          <label class="points-wrap" style="display:none;">Points <input class="points-input" type="number" min="0" value="1"></label>
+        </div>
+        <button type="button" class="remove-q">Delete question</button>
+      </div>
+    `;
+
+    const optRows = card.querySelector('.opt-rows');
+    function addOpt(text='', capacity='', correct=false){
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = optionRowHtml(text, capacity, correct);
+      const row = wrapper.firstElementChild;
+      row.querySelector('[data-remove-opt]').addEventListener('click', () => row.remove());
+      row.querySelector('.opt-correct').addEventListener('change', (e) => {
+        if (e.target.dataset.multi !== '1') {
+          optRows.querySelectorAll('.opt-correct').forEach(cb => { if (cb !== e.target) cb.checked = false; });
+        }
+      });
+      optRows.appendChild(row);
+    }
+
+    if (options.length) {
+      options.forEach(o => addOpt(o.text, o.capacity, o.correct));
+    } else if (CHOICE_TYPES.includes(type)) {
+      addOpt(); addOpt();
+    }
+
+    card.querySelector('.add-opt-btn').addEventListener('click', () => addOpt());
+    card.querySelector('.q-required').checked = required;
+    card.querySelector('.q-type-select').addEventListener('change', () => {
+      if (!optRows.children.length && CHOICE_TYPES.includes(card.querySelector('.q-type-select').value)) {
+        addOpt(); addOpt();
+      }
+      refreshQuestionCard(card);
+    });
+    card.querySelector('.remove-q').addEventListener('click', () => card.remove());
+
+    questionsWrap.appendChild(card);
+    refreshQuestionCard(card);
+    return card;
+  }
+
+  addQuestion('short_answer', 'Question 1');
+  document.getElementById('addQBtn').addEventListener('click', () => addQuestion('short_answer', `Question ${questionsWrap.children.length + 1}`));
 
   document.getElementById('createBtn').addEventListener('click', async () => {
     const banner = document.getElementById('builderBanner');
@@ -532,13 +640,32 @@ function renderBuilder(teacher){
     const description = document.getElementById('formDesc').value.trim();
     const collegeName = document.getElementById('formCollege').value.trim();
     const department = document.getElementById('formDept').value.trim();
-    const electives = Array.from(rowsEl.querySelectorAll('.elective-row')).map(row => ({
-      name: row.querySelector('.elective-name').value.trim(),
-      capacity: row.querySelector('.vacancy-input').value
-    })).filter(el => el.name && Number(el.capacity) > 0);
+    const isQuiz = isQuizToggle.checked;
 
-    if (!electives.length){
-      banner.textContent = 'Add at least one elective with a seat count above 0.';
+    const questions = Array.from(questionsWrap.querySelectorAll('.q-card')).map(card => {
+      const type = card.querySelector('.q-type-select').value;
+      const label = card.querySelector('.q-label-input').value.trim();
+      const required = card.querySelector('.q-required').checked;
+      const q = { type, label, required };
+
+      if (CHOICE_TYPES.includes(type)) {
+        const optRows = Array.from(card.querySelectorAll('[data-opt-row]'));
+        q.options = optRows.map(row => ({
+          text: row.querySelector('.opt-text').value.trim(),
+          capacity: row.querySelector('.opt-capacity').value
+        }));
+        if (isQuiz && type !== 'elective') {
+          q.correctOptionIndexes = optRows
+            .map((row, i) => row.querySelector('.opt-correct').checked ? i : -1)
+            .filter(i => i !== -1);
+          q.points = card.querySelector('.points-input').value;
+        }
+      }
+      return q;
+    }).filter(q => q.label);
+
+    if (!questions.length){
+      banner.textContent = 'Add at least one question with a label.';
       banner.className = 'banner err show';
       return;
     }
@@ -549,7 +676,7 @@ function renderBuilder(teacher){
 
     const result = await api('/api/forms', {
       method: 'POST',
-      body: JSON.stringify({ title, description, collegeName, department, electives })
+      body: JSON.stringify({ title, description, collegeName, department, isQuiz, questions })
     });
 
     if (!result.ok) {
@@ -568,7 +695,7 @@ function renderBuilder(teacher){
           <input type="text" readonly value="${escapeHtml(link)}" id="shareLink">
           <button class="copy-btn" id="copyBtn">Copy link</button>
         </div>
-        <p class="hint">Seat counts update live as students respond. Download responses any time from your dashboard.</p>
+        <p class="hint">Responses update live. Download them any time from your dashboard.</p>
       </div>
     `;
     document.getElementById('copyBtn').addEventListener('click', () => {
@@ -609,7 +736,7 @@ async function renderStudentView(formId){
     .filter(Boolean)
     .slice(0, 2)
     .map(w => w[0].toUpperCase())
-    .join('') || 'E';
+    .join('') || 'F';
 
   const instHeader = form.collegeName ? `
     <div class="inst-header">
@@ -633,11 +760,58 @@ async function renderStudentView(formId){
     return;
   }
 
+  function questionCardHtml(q, i){
+    if (q.type === 'short_answer') {
+      return `<input class="field-input" data-q="${q.id}" data-type="short_answer" type="text">`;
+    }
+    if (q.type === 'paragraph') {
+      return `<textarea class="desc-input" style="border:1px solid var(--line); border-radius:4px; padding:10px;" rows="3" data-q="${q.id}" data-type="paragraph"></textarea>`;
+    }
+    if (q.type === 'dropdown') {
+      return `
+        <select class="field-input" data-q="${q.id}" data-type="dropdown">
+          <option value="">Choose…</option>
+          ${q.options.map(o => `<option value="${escapeHtml(o.id)}">${escapeHtml(o.text)}</option>`).join('')}
+        </select>
+      `;
+    }
+    if (q.type === 'multiple_choice' || q.type === 'elective') {
+      return `
+        <div data-q="${q.id}" data-type="${q.type}">
+          ${q.options.map((o, oi) => {
+            const disabled = q.type === 'elective' && o.remaining <= 0;
+            const st = q.type === 'elective' ? statusInfo(o) : null;
+            return `
+              <div class="option ${disabled ? 'disabled' : ''}">
+                <input type="radio" name="q_${q.id}" id="q_${q.id}_${oi}" value="${escapeHtml(o.id)}" ${disabled ? 'disabled' : ''}>
+                <label for="q_${q.id}_${oi}">${escapeHtml(o.text)}</label>
+                ${st ? `<span class="seat-tag ${st.cls}">${st.text}</span>` : ''}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+    if (q.type === 'checkboxes') {
+      return `
+        <div data-q="${q.id}" data-type="checkboxes">
+          ${q.options.map((o, oi) => `
+            <div class="option">
+              <input type="checkbox" name="q_${q.id}" id="q_${q.id}_${oi}" value="${escapeHtml(o.id)}">
+              <label for="q_${q.id}_${oi}">${escapeHtml(o.text)}</label>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+    return '';
+  }
+
   app.innerHTML = `
     <div class="top-bar"></div>
     <div class="card">
       ${instHeader}
-      <h1 class="static-title">${escapeHtml(form.title)}</h1>
+      <h1 class="static-title">${escapeHtml(form.title)} ${form.isQuiz ? '<span class="type-badge">Quiz</span>' : ''}</h1>
       ${form.description ? `<p class="static-desc">${escapeHtml(form.description)}</p>` : ''}
     </div>
     <div class="card question">
@@ -652,22 +826,12 @@ async function renderStudentView(formId){
       <p class="q-label">Your department<span class="required">*</span></p>
       <input class="field-input" id="sDept" type="text" placeholder="e.g. Computer Science" required>
     </div>
-    <div class="card question">
-      <p class="q-label">Elective<span class="required">*</span></p>
-      <div id="optionsList">
-        ${form.electives.map((el, i) => {
-          const st = statusInfo(el);
-          const disabled = el.remaining <= 0;
-          return `
-            <div class="option ${disabled ? 'disabled' : ''}">
-              <input type="radio" name="elective" id="opt${i}" value="${escapeHtml(el.id)}" ${disabled ? 'disabled' : ''}>
-              <label for="opt${i}">${escapeHtml(el.name)}</label>
-              <span class="seat-tag ${st.cls}">${st.text}</span>
-            </div>
-          `;
-        }).join('')}
+    ${form.questions.map(q => `
+      <div class="card question">
+        <p class="q-label">${escapeHtml(q.label)}${q.required ? '<span class="required">*</span>' : ''}</p>
+        ${questionCardHtml(q)}
       </div>
-    </div>
+    `).join('')}
     <div class="card question">
       <p class="q-label">Email<span class="required">*</span></p>
       <input class="field-input narrow" id="sEmail" type="email" required>
@@ -684,10 +848,28 @@ async function renderStudentView(formId){
     const registerNo = document.getElementById('sRegNo').value.trim();
     const department = document.getElementById('sDept').value.trim();
     const email = document.getElementById('sEmail').value.trim();
-    const chosen = document.querySelector('input[name=elective]:checked');
 
-    if (!name || !registerNo || !department || !email || !chosen){
-      banner.textContent = 'Please fill in every field and choose an elective.';
+    const answers = form.questions.map(q => {
+      if (q.type === 'checkboxes') {
+        const checked = Array.from(document.querySelectorAll(`input[name="q_${q.id}"]:checked`)).map(el => el.value);
+        return { questionId: q.id, value: checked };
+      }
+      if (q.type === 'multiple_choice' || q.type === 'elective') {
+        const checked = document.querySelector(`input[name="q_${q.id}"]:checked`);
+        return { questionId: q.id, value: checked ? checked.value : '' };
+      }
+      const el = document.querySelector(`[data-q="${q.id}"]`);
+      return { questionId: q.id, value: el ? el.value.trim() : '' };
+    });
+
+    const missingRequired = form.questions.some(q => {
+      if (!q.required) return false;
+      const a = answers.find(x => x.questionId === q.id);
+      return !a || (Array.isArray(a.value) ? a.value.length === 0 : !a.value);
+    });
+
+    if (!name || !registerNo || !department || !email || missingRequired){
+      banner.textContent = 'Please fill in every required field.';
       banner.className = 'banner err show';
       return;
     }
@@ -698,7 +880,7 @@ async function renderStudentView(formId){
 
     const result = await api(`/api/public/forms/${formId}/responses`, {
       method: 'POST',
-      body: JSON.stringify({ name, registerNo, department, email, electiveId: chosen.value })
+      body: JSON.stringify({ name, registerNo, department, email, answers })
     });
 
     if (result.ok) {
@@ -708,6 +890,7 @@ async function renderStudentView(formId){
           <div class="check">✓</div>
           <h1 class="static-title">Response recorded</h1>
           <p class="static-desc">${escapeHtml(result.message)}</p>
+          ${result.maxScore != null ? `<div class="score-box">${result.score} / ${result.maxScore}</div>` : ''}
         </div>
       `;
     } else {
