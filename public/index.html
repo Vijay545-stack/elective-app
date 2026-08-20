@@ -10,102 +10,121 @@
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
 <style>
   :root{
-    --purple:#673ab7; --purple-dark:#5e35b1; --bg:#f0ebf8; --card:#fff;
-    --line:#e0e0e0; --text:#202124; --muted:#5f6368;
-    --red:#d93025; --green:#188038; --amber:#e37400;
+    --purple:#4F3CC9; --purple-dark:#3F2FA6; --purple-soft:#EEEBFB;
+    --teal:#0E8074; --teal-soft:#E3F5F2;
+    --bg:#F6F5FA; --card:#fff;
+    --line:#E6E3F1; --line-soft:#F0EEF8; --text:#181524; --muted:#66647A;
+    --red:#D0271D; --red-soft:#FCEBEA; --green:#0E8074; --green-soft:#E3F5F2; --amber:#B4560A; --amber-soft:#FCF0E3;
+    --shadow-sm: 0 1px 2px rgba(24,21,36,.05), 0 1px 3px rgba(24,21,36,.06);
+    --shadow-md: 0 4px 12px rgba(24,21,36,.08), 0 1px 3px rgba(24,21,36,.05);
+    --radius: 12px;
   }
   *{box-sizing:border-box;}
-  body{margin:0; background:var(--bg); color:var(--text); font-family:'Roboto',sans-serif;}
+  body{margin:0; background:var(--bg); color:var(--text); font-family:'Roboto',sans-serif; -webkit-font-smoothing:antialiased;}
   .page{max-width:760px; margin:0 auto; padding:32px 16px 80px;}
-  .top-bar{height:10px; border-radius:8px 8px 0 0; background:var(--purple);}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:0 0 8px 8px; padding:24px; margin-bottom:24px;}
-  .card.question{border-radius:8px;}
-  h1.static-title{font-family:'Google Sans','Roboto',sans-serif; font-size:28px; font-weight:400; margin:0 0 8px;}
-  p.static-desc{font-size:14px; color:var(--muted); margin:0; white-space:pre-wrap;}
-  .title-input,.desc-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 0; font-family:'Google Sans','Roboto',sans-serif; background:transparent; color:var(--text);}
-  .title-input{font-size:28px; font-weight:400; margin-bottom:8px;}
+  .top-bar{display:none;}
+  .card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow-sm); padding:26px 24px; margin-bottom:20px;}
+  .card.question{border-radius:var(--radius);}
+  h1.static-title{font-family:'Google Sans','Roboto',sans-serif; font-size:26px; font-weight:500; letter-spacing:-.01em; margin:0 0 8px; color:var(--text);}
+  p.static-desc{font-size:14.5px; line-height:1.55; color:var(--muted); margin:0; white-space:pre-wrap;}
+  .title-input,.desc-input{width:100%; border:none; border-bottom:1.5px solid var(--line); padding:8px 0; font-family:'Google Sans','Roboto',sans-serif; background:transparent; color:var(--text); transition:border-color .15s;}
+  .title-input{font-size:24px; font-weight:500; margin-bottom:8px;}
   .desc-input{font-size:14px; color:var(--muted); resize:vertical; min-height:40px;}
   .title-input:focus,.desc-input:focus,input:focus,textarea:focus,select:focus{outline:none; border-bottom:2px solid var(--purple);}
-  .q-label{font-size:15px; margin-bottom:12px;}
+  .q-label{font-size:14.5px; font-weight:500; margin-bottom:12px; color:var(--text);}
   .required{color:var(--red); margin-left:2px;}
-  .field-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 2px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text); background:transparent;}
+  .field-input{width:100%; border:none; border-bottom:1.5px solid var(--line); padding:9px 2px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text); background:transparent; transition:border-color .15s;}
   .field-input.narrow{max-width:400px;}
   select.field-input{background:transparent; -webkit-appearance:none; appearance:none;}
   .elective-row{display:flex; gap:12px; align-items:center; margin-bottom:14px;}
   .elective-row .field-input{flex:1;}
   .elective-row .vacancy-input{width:110px; flex:none;}
-  .remove-row{background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; padding:4px 8px;}
-  .remove-row:hover{color:var(--red);}
-  .add-row-btn{background:none; border:1px dashed var(--line); color:var(--purple); padding:10px 16px; border-radius:4px; font-family:'Google Sans','Roboto',sans-serif; font-size:14px; cursor:pointer; margin-top:4px;}
-  .add-row-btn:hover{background:#f3edfb;}
+  .remove-row{background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; padding:4px 8px; border-radius:6px; transition:background .15s,color .15s;}
+  .remove-row:hover{color:var(--red); background:var(--red-soft);}
+  .add-row-btn{background:#fff; border:1.5px dashed var(--line); color:var(--purple); padding:10px 16px; border-radius:8px; font-family:'Google Sans','Roboto',sans-serif; font-weight:500; font-size:13.5px; cursor:pointer; margin-top:4px; transition:background .15s,border-color .15s;}
+  .add-row-btn:hover{background:var(--purple-soft); border-color:var(--purple);}
   .actions-row{display:flex; justify-content:flex-end; align-items:center; gap:16px; margin-top:8px;}
-  .btn{font-family:'Google Sans','Roboto',sans-serif; font-size:14px; font-weight:500; padding:10px 24px; border-radius:4px; border:none; cursor:pointer;}
-  .btn-primary{background:var(--purple); color:#fff;}
-  .btn-primary:hover{background:var(--purple-dark);}
-  .btn-primary:disabled{background:#c8bfe0; cursor:not-allowed;}
+  .btn{font-family:'Google Sans','Roboto',sans-serif; font-size:14px; font-weight:500; padding:11px 26px; border-radius:8px; border:none; cursor:pointer; transition:background .15s,box-shadow .15s,transform .05s;}
+  .btn-primary{background:var(--purple); color:#fff; box-shadow:0 2px 6px rgba(79,60,201,.28);}
+  .btn-primary:hover{background:var(--purple-dark); box-shadow:0 3px 10px rgba(79,60,201,.34);}
+  .btn-primary:active{transform:translateY(1px);}
+  .btn-primary:disabled{background:#CFCBEB; box-shadow:none; cursor:not-allowed;}
+  .btn-secondary{background:#fff; color:var(--purple); border:1.5px solid var(--line);}
+  .btn-secondary:hover{background:var(--purple-soft); border-color:var(--purple);}
   .btn-text{background:none; color:var(--purple);}
-  .option{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f1f1f1;}
+  .option{display:flex; align-items:center; gap:12px; padding:11px 4px; border-bottom:1px solid var(--line-soft); border-radius:6px; transition:background .12s;}
+  .option:hover{background:var(--purple-soft);}
   .option:last-child{border-bottom:none;}
   .option input[type=radio],.option input[type=checkbox]{accent-color:var(--purple); width:18px; height:18px;}
   .option label{flex:1; font-size:14px; cursor:pointer;}
-  .seat-tag{font-size:12px; font-family:'Roboto Mono',monospace; padding:2px 8px; border-radius:10px; white-space:nowrap;}
-  .seat-open{color:var(--green); background:#e6f4ea;}
-  .seat-filling{color:var(--amber); background:#fef3e0;}
-  .seat-full{color:var(--red); background:#fce8e6;}
+  .seat-tag{font-size:11.5px; font-weight:500; font-family:'Roboto Mono',monospace; padding:3px 9px; border-radius:20px; white-space:nowrap;}
+  .seat-open{color:var(--green); background:var(--green-soft);}
+  .seat-filling{color:var(--amber); background:var(--amber-soft);}
+  .seat-full{color:var(--red); background:var(--red-soft);}
   .option.disabled label{color:var(--muted);}
-  .link-box{display:flex; gap:8px; align-items:center; background:#f3edfb; border:1px solid var(--purple); border-radius:4px; padding:12px 14px; margin-top:16px;}
+  .option.disabled:hover{background:transparent;}
+  .link-box{display:flex; gap:8px; align-items:center; background:var(--purple-soft); border:1.5px solid #D9D3F5; border-radius:8px; padding:12px 14px; margin-top:16px;}
   .link-box input{flex:1; border:none; background:transparent; font-family:'Roboto Mono',monospace; font-size:13px; color:var(--text);}
   .link-box input:focus{outline:none;}
-  .copy-btn{background:var(--purple); color:#fff; border:none; padding:8px 14px; border-radius:4px; font-size:13px; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer;}
-  .hint{font-size:12px; color:var(--muted); margin-top:10px;}
-  .banner{padding:14px 18px; border-radius:8px; margin-bottom:20px; font-size:14px; display:none;}
+  .copy-btn{background:var(--purple); color:#fff; border:none; padding:9px 16px; border-radius:7px; font-size:13px; font-weight:500; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; transition:background .15s;}
+  .copy-btn:hover{background:var(--purple-dark);}
+  .hint{font-size:12.5px; color:var(--muted); margin-top:10px; line-height:1.5;}
+  .banner{padding:13px 18px; border-radius:8px; margin-bottom:20px; font-size:14px; display:none;}
   .banner.show{display:block;}
-  .banner.err{background:#fce8e6; color:var(--red); border:1px solid var(--red);}
-  .banner.ok{background:#e6f4ea; color:var(--green); border:1px solid var(--green);}
-  .confirm{text-align:center; padding:40px 20px;}
-  .confirm .check{font-size:40px; color:var(--green); margin-bottom:12px;}
-  .confirm .score-box{margin-top:14px; display:inline-block; padding:10px 20px; border-radius:20px; background:#f3edfb; color:var(--purple); font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:16px;}
-  .topnav{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
-  .topnav .brand{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; color:var(--purple);}
+  .banner.err{background:var(--red-soft); color:var(--red); border:1px solid #F3C9C6;}
+  .banner.ok{background:var(--green-soft); color:var(--green); border:1px solid #BFE6E1;}
+  .confirm{text-align:center; padding:44px 20px;}
+  .confirm .check{width:56px; height:56px; line-height:56px; margin:0 auto 16px; border-radius:50%; background:var(--green-soft); color:var(--green); font-size:26px;}
+  .confirm .score-box{margin-top:14px; display:inline-block; padding:10px 24px; border-radius:24px; background:var(--purple-soft); color:var(--purple); font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:17px;}
+  .success-card{text-align:left; border-left:4px solid var(--green);}
+  .success-check{width:34px; height:34px; line-height:34px; text-align:center; border-radius:50%; background:var(--green-soft); color:var(--green); font-size:16px; margin-bottom:12px;}
+  .topnav{display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding-bottom:16px; border-bottom:1px solid var(--line);}
+  .topnav .brand{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; letter-spacing:-.01em; color:var(--text); display:flex; align-items:center; gap:8px;}
+  .topnav .brand::before{content:''; width:10px; height:10px; border-radius:3px; background:var(--purple); display:inline-block;}
   .topnav .who{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:10px;}
-  .link-plain{color:var(--purple); text-decoration:none; font-size:13px; cursor:pointer;}
-  .form-list-item{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid #f1f1f1;}
+  .who-chip{width:26px; height:26px; border-radius:50%; background:var(--purple); color:#fff; font-size:12px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; font-family:'Google Sans','Roboto',sans-serif;}
+  .link-plain{color:var(--purple); text-decoration:none; font-size:13px; font-weight:500; cursor:pointer; transition:color .15s;}
+  .link-plain:hover{color:var(--purple-dark); text-decoration:underline;}
+  .form-list-item{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:16px 4px; border-bottom:1px solid var(--line-soft); flex-wrap:wrap;}
   .form-list-item:last-child{border-bottom:none;}
-  .form-list-title{font-family:'Google Sans','Roboto',sans-serif; font-size:16px;}
-  .form-list-meta{font-size:12px; color:var(--muted); margin-top:2px;}
-  .row-actions{display:flex; gap:14px; align-items:center; flex-wrap:wrap;}
+  .form-card{transition:box-shadow .15s,transform .1s;}
+  .form-card:hover{box-shadow:var(--shadow-md);}
+  .form-list-title{font-family:'Google Sans','Roboto',sans-serif; font-size:15.5px; font-weight:500; display:flex; align-items:center; flex-wrap:wrap; gap:2px;}
+  .form-list-meta{font-size:12.5px; color:var(--muted); margin-top:4px;}
+  .row-actions{display:flex; gap:16px; align-items:center; flex-wrap:wrap;}
   .auth-toggle{font-size:13px; color:var(--muted); margin-top:16px; text-align:center;}
   .auth-toggle a{color:var(--purple); cursor:pointer;}
-  .empty-state{color:var(--muted); font-size:14px; padding:12px 0;}
+  .empty-state{color:var(--muted); font-size:14px; padding:20px 4px; text-align:center;}
 
   .inst-header{display:flex; align-items:center; gap:14px; margin-bottom:14px;}
-  .inst-crest{width:48px; height:48px; border-radius:50%; background:linear-gradient(135deg, var(--purple), #9575cd); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; flex-shrink:0;}
-  .inst-text .inst-college{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:16px; color:var(--text); line-height:1.25;}
-  .inst-text .inst-dept{font-size:12px; color:var(--muted); letter-spacing:.04em; text-transform:uppercase;}
+  .inst-crest{width:46px; height:46px; border-radius:12px; background:linear-gradient(135deg, var(--purple), #7C6AE8); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:17px; flex-shrink:0;}
+  .inst-text .inst-college{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:15.5px; color:var(--text); line-height:1.25;}
+  .inst-text .inst-dept{font-size:11.5px; color:var(--muted); letter-spacing:.06em; text-transform:uppercase; font-weight:500;}
   .field-row-pair{display:flex; gap:20px;}
   .field-row-pair > div{flex:1;}
   @media (max-width:600px){ .field-row-pair{flex-direction:column; gap:0;} }
-  .responses-panel{background:#faf9fc; border:1px solid var(--line); border-top:none; padding:14px; margin:-20px 0 24px;}
-  .pw-toggle{position:absolute; right:2px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--purple); font-size:12px; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; padding:6px 4px;}
+  .responses-panel{background:#FBFAFD; border:1px solid var(--line); border-radius:10px; padding:16px; margin:12px 0 4px;}
+  .pw-toggle{position:absolute; right:2px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--purple); font-size:12px; font-weight:500; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; padding:6px 4px;}
 
   /* --- question builder --- */
-  .q-card{border:1px solid var(--line); border-left:4px solid var(--purple); border-radius:6px; padding:18px; margin-bottom:16px; background:#fff;}
+  .q-card{border:1px solid var(--line); border-left:4px solid var(--purple); border-radius:10px; padding:20px; margin-bottom:16px; background:#fff; box-shadow:var(--shadow-sm); transition:box-shadow .15s;}
+  .q-card:focus-within{box-shadow:var(--shadow-md);}
   .q-card-head{display:flex; gap:12px; align-items:flex-start; margin-bottom:14px;}
-  .q-card-head .q-label-input{flex:1;}
-  .q-type-select{width:180px; flex:none; border:1px solid var(--line); border-radius:4px; padding:9px 8px; font-size:13px; font-family:'Roboto',sans-serif; color:var(--text); background:#fff;}
+  .q-card-head .q-label-input{flex:1; font-weight:500;}
+  .q-type-select{width:180px; flex:none; border:1.5px solid var(--line); border-radius:7px; padding:9px 10px; font-size:13px; font-family:'Roboto',sans-serif; color:var(--text); background:#fff; cursor:pointer;}
   .q-opts{margin-top:6px;}
   .q-opt-row{display:flex; align-items:center; gap:10px; margin-bottom:10px;}
   .q-opt-row .opt-text{flex:1;}
   .q-opt-row .opt-capacity{width:90px; flex:none;}
   .q-opt-row .opt-correct{flex:none; width:18px; height:18px; accent-color:var(--green);}
-  .q-card-foot{display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid #f1f1f1; padding-top:12px; flex-wrap:wrap; gap:10px;}
+  .q-card-foot{display:flex; justify-content:space-between; align-items:center; margin-top:14px; border-top:1px solid var(--line-soft); padding-top:12px; flex-wrap:wrap; gap:10px;}
   .q-card-foot .left-controls{display:flex; align-items:center; gap:16px; font-size:13px; color:var(--muted); flex-wrap:wrap;}
   .q-card-foot label{display:flex; align-items:center; gap:6px; cursor:pointer;}
-  .points-input{width:56px; border:none; border-bottom:1px solid var(--line); padding:4px 2px; font-size:13px; text-align:center;}
-  .remove-q{background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px;}
-  .remove-q:hover{color:var(--red);}
-  .type-badge{display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px; background:#f3edfb; color:var(--purple); margin-left:8px; vertical-align:middle;}
-  .quiz-toggle{display:flex; align-items:center; gap:10px; font-size:14px; margin-top:2px;}
+  .points-input{width:56px; border:none; border-bottom:1.5px solid var(--line); padding:4px 2px; font-size:13px; text-align:center;}
+  .remove-q{background:none; border:none; color:var(--muted); cursor:pointer; font-size:13px; padding:4px 8px; border-radius:6px; transition:background .15s,color .15s;}
+  .remove-q:hover{color:var(--red); background:var(--red-soft);}
+  .type-badge{display:inline-block; font-size:11px; font-weight:600; letter-spacing:.03em; text-transform:uppercase; padding:3px 9px; border-radius:20px; background:var(--purple-soft); color:var(--purple); margin-left:8px; vertical-align:middle;}
+  .quiz-toggle{display:flex; align-items:center; gap:10px; font-size:14px; margin-top:2px; color:var(--muted);}
   .quiz-toggle input{width:18px; height:18px; accent-color:var(--purple);}
   .correct-hint{font-size:12px; color:var(--muted); margin-top:2px;}
 </style>
@@ -354,20 +373,20 @@ function renderForgotPasswordReset(email, question){
    TEACHER: DASHBOARD (list of forms)
 ============================================================ */
 async function renderDashboard(teacher){
+  const initials = (teacher.name || '?').trim().slice(0, 1).toUpperCase();
   app.innerHTML = `
     <div class="topnav">
       <span class="brand">Form Builder</span>
-      <span class="who">${escapeHtml(teacher.name)} &middot; <a class="link-plain" id="logoutLink">Log out</a></span>
+      <span class="who"><span class="who-chip">${escapeHtml(initials)}</span>${escapeHtml(teacher.name)} &middot; <a class="link-plain" id="logoutLink">Log out</a></span>
     </div>
-    <div class="top-bar"></div>
     <div class="card">
       <h1 class="static-title">Your forms</h1>
       <p class="static-desc">Build a form or quiz, share its link, and watch responses come in live.</p>
+      <div class="actions-row" style="justify-content:flex-start; margin-top:16px;">
+        <button class="btn btn-primary" id="newFormBtn">+ Create new form</button>
+      </div>
     </div>
-    <div class="card question">
-      <div id="formListWrap"><p class="empty-state">Loading…</p></div>
-      <button type="button" class="add-row-btn" id="newFormBtn">+ Create new form</button>
-    </div>
+    <div id="formListWrap"><p class="empty-state">Loading…</p></div>
   `;
 
   document.getElementById('logoutLink').addEventListener('click', async () => {
@@ -379,40 +398,42 @@ async function renderDashboard(teacher){
   const res = await api('/api/forms');
   const wrap = document.getElementById('formListWrap');
   if (!res.ok || !res.forms.length) {
-    wrap.innerHTML = '<p class="empty-state">No forms yet — create your first one below.</p>';
+    wrap.innerHTML = '<div class="card question"><p class="empty-state">No forms yet — tap "+ Create new form" above to build your first one.</p></div>';
     return;
   }
   wrap.innerHTML = res.forms.map(f => {
     const link = window.location.origin + '/?form=' + f.id;
     return `
-      <div class="form-list-item" data-form-id="${f.id}">
-        <div>
-          <div class="form-list-title">
-            ${escapeHtml(f.title)}
-            ${f.isQuiz ? '<span class="type-badge">Quiz</span>' : ''}
-            ${f.closed ? '<span class="seat-tag seat-full" style="margin-left:6px;">Closed</span>' : ''}
+      <div class="card question form-card" data-form-id="${f.id}">
+        <div class="form-list-item" style="padding:0; border:none;">
+          <div>
+            <div class="form-list-title">
+              ${escapeHtml(f.title)}
+              ${f.isQuiz ? '<span class="type-badge">Quiz</span>' : ''}
+              ${f.closed ? '<span class="seat-tag seat-full" style="margin-left:6px;">Closed</span>' : '<span class="seat-tag seat-open" style="margin-left:6px;">Live</span>'}
+            </div>
+            <div class="form-list-meta">
+              ${[f.department, f.collegeName].filter(Boolean).join(' · ')}
+              ${f.department || f.collegeName ? ' &middot; ' : ''}${f.questionCount} question${f.questionCount === 1 ? '' : 's'} &middot; ${f.responseCount} response${f.responseCount === 1 ? '' : 's'}
+            </div>
           </div>
-          <div class="form-list-meta">
-            ${[f.department, f.collegeName].filter(Boolean).join(' · ')}
-            ${f.department || f.collegeName ? ' &middot; ' : ''}${f.questionCount} question${f.questionCount === 1 ? '' : 's'} &middot; ${f.responseCount} response${f.responseCount === 1 ? '' : 's'}
+          <div class="row-actions">
+            <a class="link-plain" href="${link}" target="_blank">Open link</a>
+            <a class="link-plain view-responses-link" href="#">Responses</a>
+            <a class="link-plain" href="/api/forms/${f.id}/export">CSV</a>
+            <a class="link-plain toggle-close-link" href="#">${f.closed ? 'Reopen' : 'Close'}</a>
+            <a class="link-plain delete-form-link" href="#" style="color:var(--red);">Delete</a>
           </div>
         </div>
-        <div class="row-actions">
-          <a class="link-plain" href="${link}" target="_blank">Open link</a>
-          <a class="link-plain view-responses-link" href="#">Responses</a>
-          <a class="link-plain" href="/api/forms/${f.id}/export">CSV</a>
-          <a class="link-plain toggle-close-link" href="#">${f.closed ? 'Reopen' : 'Close'}</a>
-          <a class="link-plain delete-form-link" href="#" style="color:var(--red);">Delete</a>
-        </div>
+        <div class="responses-panel" id="responses-${f.id}" style="display:none;"></div>
       </div>
-      <div class="responses-panel" id="responses-${f.id}" style="display:none;"></div>
     `;
   }).join('');
 
   wrap.querySelectorAll('.view-responses-link').forEach(link => {
     link.addEventListener('click', async (e) => {
       e.preventDefault();
-      const item = e.target.closest('.form-list-item');
+      const item = e.target.closest('.form-card');
       const formId = item.dataset.formId;
       const panel = document.getElementById('responses-' + formId);
       if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
@@ -463,7 +484,7 @@ async function renderDashboard(teacher){
   wrap.querySelectorAll('.toggle-close-link').forEach(link => {
     link.addEventListener('click', async (e) => {
       e.preventDefault();
-      const item = e.target.closest('.form-list-item');
+      const item = e.target.closest('.form-card');
       const formId = item.dataset.formId;
       const isCurrentlyClosed = e.target.textContent.trim() === 'Reopen';
       await api(`/api/forms/${formId}`, {
@@ -477,7 +498,7 @@ async function renderDashboard(teacher){
   wrap.querySelectorAll('.delete-form-link').forEach(link => {
     link.addEventListener('click', async (e) => {
       e.preventDefault();
-      const item = e.target.closest('.form-list-item');
+      const item = e.target.closest('.form-card');
       const formId = item.dataset.formId;
       if (!confirm('Delete this form and all its responses? This cannot be undone.')) return;
       await api(`/api/forms/${formId}`, { method: 'DELETE' });
@@ -632,7 +653,9 @@ function renderBuilder(teacher){
   addQuestion('short_answer', 'Question 1');
   document.getElementById('addQBtn').addEventListener('click', () => addQuestion('short_answer', `Question ${questionsWrap.children.length + 1}`));
 
+  let formAlreadyCreated = false;
   document.getElementById('createBtn').addEventListener('click', async () => {
+    if (formAlreadyCreated) return; // guards against any repeat click on this button
     const banner = document.getElementById('builderBanner');
     banner.className = 'banner';
 
@@ -687,15 +710,26 @@ function renderBuilder(teacher){
       return;
     }
 
+    // Success: this button's one job (create the form) is done. Retire it
+    // completely rather than repurposing it, so a stray click can never
+    // silently fire a second create request.
+    formAlreadyCreated = true;
+    createBtn.disabled = true;
+    createBtn.style.display = 'none';
+
     const link = window.location.origin + '/?form=' + result.formId;
     document.getElementById('linkPanel').innerHTML = `
-      <div class="card question">
-        <p class="q-label" style="font-weight:500;">Send this link to students</p>
+      <div class="card question success-card">
+        <div class="success-check">✓</div>
+        <p class="q-label" style="font-weight:500;">Form created — send this link to students</p>
         <div class="link-box">
           <input type="text" readonly value="${escapeHtml(link)}" id="shareLink">
           <button class="copy-btn" id="copyBtn">Copy link</button>
         </div>
         <p class="hint">Responses update live. Download them any time from your dashboard.</p>
+        <div class="actions-row" style="justify-content:flex-start; margin-top:16px;">
+          <button class="btn btn-secondary" id="backToFormsBtn">Back to your forms</button>
+        </div>
       </div>
     `;
     document.getElementById('copyBtn').addEventListener('click', () => {
@@ -706,9 +740,7 @@ function renderBuilder(teacher){
       btn.textContent = 'Copied!';
       setTimeout(() => btn.textContent = 'Copy link', 1500);
     });
-    createBtn.textContent = 'Back to your forms';
-    createBtn.disabled = false;
-    createBtn.onclick = () => renderDashboard(teacher);
+    document.getElementById('backToFormsBtn').addEventListener('click', () => renderDashboard(teacher));
   });
 }
 
