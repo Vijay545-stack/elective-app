@@ -237,7 +237,8 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
 });
 
 // Any non-API route falls through to the single-page app
-app.get('*', (req, res) => {
+// Any non-API route falls through to the single-page app
+app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
