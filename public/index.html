@@ -4,193 +4,1369 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Elective Registration</title>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+
 <style>
-  :root{
-    --purple:#673ab7; --purple-dark:#5e35b1; --bg:#f0ebf8; --card:#fff;
-    --line:#e0e0e0; --text:#202124; --muted:#5f6368;
-    --red:#d93025; --green:#188038; --amber:#e37400;
+:root{
+  --purple:#673ab7;
+  --purple-dark:#5e35b1;
+  --bg:#f0ebf8;
+  --card:#fff;
+  --line:#dadce0;
+  --text:#202124;
+  --muted:#5f6368;
+  --red:#d93025;
+  --green:#188038;
+  --orange:#e37400;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family:Roboto,Arial,sans-serif;
+}
+
+.page{
+  max-width:760px;
+  margin:auto;
+  padding:25px 15px 70px;
+}
+
+.top-bar{
+  height:10px;
+  background:var(--purple);
+  border-radius:8px 8px 0 0;
+}
+
+.card{
+  background:white;
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:24px;
+  margin-bottom:18px;
+}
+
+.main-card{
+  border-radius:0 0 8px 8px;
+}
+
+h1{
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:28px;
+  font-weight:400;
+  margin:0 0 10px;
+}
+
+h2{
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-weight:500;
+}
+
+.description{
+  color:var(--muted);
+  font-size:14px;
+  white-space:pre-wrap;
+}
+
+label{
+  display:block;
+  font-size:14px;
+  margin-bottom:7px;
+}
+
+.required{
+  color:var(--red);
+}
+
+input,
+textarea{
+  width:100%;
+  padding:12px;
+  border:1px solid #aaa;
+  border-radius:4px;
+  font-size:15px;
+  font-family:Roboto,sans-serif;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
+}
+
+input:focus,
+textarea:focus{
+  outline:none;
+  border:2px solid var(--purple);
+}
+
+.field{
+  margin-bottom:20px;
+}
+
+button{
+  border:none;
+  border-radius:5px;
+  padding:11px 20px;
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:14px;
+  font-weight:500;
+  cursor:pointer;
+}
+
+.primary{
+  background:var(--purple);
+  color:white;
+}
+
+.primary:hover{
+  background:var(--purple-dark);
+}
+
+.secondary{
+  background:white;
+  color:var(--purple);
+  border:1px solid var(--purple);
+}
+
+.danger{
+  background:white;
+  color:var(--red);
+  border:1px solid #ddd;
+}
+
+button:disabled{
+  opacity:.6;
+  cursor:not-allowed;
+}
+
+.actions{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+.auth-switch{
+  margin-top:18px;
+  text-align:center;
+  color:var(--muted);
+  font-size:14px;
+}
+
+.auth-switch span{
+  color:var(--purple);
+  cursor:pointer;
+}
+
+.error{
+  background:#fce8e6;
+  color:var(--red);
+  padding:12px;
+  border-radius:5px;
+  margin:12px 0;
+}
+
+.success{
+  background:#e6f4ea;
+  color:var(--green);
+  padding:12px;
+  border-radius:5px;
+  margin:12px 0;
+}
+
+.nav{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+  gap:10px;
+}
+
+.brand{
+  color:var(--purple);
+  font-family:"Google Sans";
+  font-size:20px;
+  font-weight:700;
+}
+
+.user{
+  color:var(--muted);
+  font-size:13px;
+}
+
+.form-row{
+  display:grid;
+  grid-template-columns:1fr 120px 80px;
+  gap:10px;
+  margin-bottom:12px;
+  align-items:center;
+}
+
+.form-card{
+  padding:20px;
+}
+
+.form-card-title{
+  font-family:"Google Sans";
+  font-size:18px;
+  margin-bottom:5px;
+}
+
+.meta{
+  color:var(--muted);
+  font-size:13px;
+  margin-bottom:15px;
+}
+
+.elective{
+  border-bottom:1px solid #eee;
+  padding:10px 0;
+  display:flex;
+  justify-content:space-between;
+}
+
+.elective:last-child{
+  border-bottom:none;
+}
+
+.link-box{
+  display:flex;
+  gap:8px;
+  background:#f3edfb;
+  padding:10px;
+  border:1px solid var(--purple);
+  border-radius:5px;
+  margin-top:15px;
+}
+
+.link-box input{
+  flex:1;
+  border:none;
+  background:transparent;
+  min-width:0;
+}
+
+.option{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:14px 5px;
+  border-bottom:1px solid #eee;
+}
+
+.option input{
+  width:auto;
+}
+
+.option label{
+  flex:1;
+  margin:0;
+  cursor:pointer;
+}
+
+.seats{
+  font-size:12px;
+  padding:4px 9px;
+  border-radius:15px;
+  white-space:nowrap;
+}
+
+.available{
+  color:var(--green);
+  background:#e6f4ea;
+}
+
+.almost{
+  color:var(--orange);
+  background:#fef3e0;
+}
+
+.full{
+  color:var(--red);
+  background:#fce8e6;
+}
+
+.confirm{
+  text-align:center;
+  padding:50px 20px;
+}
+
+.check{
+  font-size:50px;
+  color:var(--green);
+}
+
+.center{
+  text-align:center;
+}
+
+.empty{
+  color:var(--muted);
+  text-align:center;
+  padding:25px;
+}
+
+@media(max-width:600px){
+
+  .page{
+    padding:12px 8px 50px;
   }
-  *{box-sizing:border-box;}
-  body{margin:0; background:var(--bg); color:var(--text); font-family:'Roboto',sans-serif;}
-  .page{max-width:760px; margin:0 auto; padding:32px 16px 80px;}
-  .top-bar{height:10px; border-radius:8px 8px 0 0; background:var(--purple);}
-  .card{background:var(--card); border:1px solid var(--line); border-radius:0 0 8px 8px; padding:24px; margin-bottom:24px;}
-  .card.question{border-radius:8px;}
-  h1.static-title{font-family:'Google Sans','Roboto',sans-serif; font-size:28px; font-weight:400; margin:0 0 8px;}
-  p.static-desc{font-size:14px; color:var(--muted); margin:0; white-space:pre-wrap;}
-  .title-input,.desc-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 0; font-family:'Google Sans','Roboto',sans-serif; background:transparent; color:var(--text);}
-  .title-input{font-size:28px; font-weight:400; margin-bottom:8px;}
-  .desc-input{font-size:14px; color:var(--muted); resize:vertical; min-height:40px;}
-  .title-input:focus,.desc-input:focus,input:focus,textarea:focus{outline:none; border-bottom:2px solid var(--purple);}
-  .q-label{font-size:15px; margin-bottom:12px;}
-  .required{color:var(--red); margin-left:2px;}
-  .field-input{width:100%; border:none; border-bottom:1px solid var(--line); padding:8px 2px; font-size:14px; font-family:'Roboto',sans-serif; color:var(--text);}
-  .field-input.narrow{max-width:400px;}
-  .elective-row{display:flex; gap:12px; align-items:center; margin-bottom:14px;}
-  .elective-row .field-input{flex:1;}
-  .elective-row .vacancy-input{width:110px; flex:none;}
-  .remove-row{background:none; border:none; color:var(--muted); cursor:pointer; font-size:20px; line-height:1; padding:4px 8px;}
-  .remove-row:hover{color:var(--red);}
-  .add-row-btn{background:none; border:1px dashed var(--line); color:var(--purple); padding:10px 16px; border-radius:4px; font-family:'Google Sans','Roboto',sans-serif; font-size:14px; cursor:pointer; margin-top:4px;}
-  .add-row-btn:hover{background:#f3edfb;}
-  .actions-row{display:flex; justify-content:flex-end; align-items:center; gap:16px; margin-top:8px;}
-  .btn{font-family:'Google Sans','Roboto',sans-serif; font-size:14px; font-weight:500; padding:10px 24px; border-radius:4px; border:none; cursor:pointer;}
-  .btn-primary{background:var(--purple); color:#fff;}
-  .btn-primary:hover{background:var(--purple-dark);}
-  .btn-primary:disabled{background:#c8bfe0; cursor:not-allowed;}
-  .btn-text{background:none; color:var(--purple);}
-  .option{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px solid #f1f1f1;}
-  .option:last-child{border-bottom:none;}
-  .option input[type=radio]{accent-color:var(--purple); width:18px; height:18px;}
-  .option label{flex:1; font-size:14px; cursor:pointer;}
-  .seat-tag{font-size:12px; font-family:'Roboto Mono',monospace; padding:2px 8px; border-radius:10px; white-space:nowrap;}
-  .seat-open{color:var(--green); background:#e6f4ea;}
-  .seat-filling{color:var(--amber); background:#fef3e0;}
-  .seat-full{color:var(--red); background:#fce8e6;}
-  .option.disabled label{color:var(--muted);}
-  .link-box{display:flex; gap:8px; align-items:center; background:#f3edfb; border:1px solid var(--purple); border-radius:4px; padding:12px 14px; margin-top:16px;}
-  .link-box input{flex:1; border:none; background:transparent; font-family:'Roboto Mono',monospace; font-size:13px; color:var(--text);}
-  .link-box input:focus{outline:none;}
-  .copy-btn{background:var(--purple); color:#fff; border:none; padding:8px 14px; border-radius:4px; font-size:13px; font-family:'Google Sans','Roboto',sans-serif; cursor:pointer;}
-  .hint{font-size:12px; color:var(--muted); margin-top:10px;}
-  .banner{padding:14px 18px; border-radius:8px; margin-bottom:20px; font-size:14px; display:none;}
-  .banner.show{display:block;}
-  .banner.err{background:#fce8e6; color:var(--red); border:1px solid var(--red);}
-  .banner.ok{background:#e6f4ea; color:var(--green); border:1px solid var(--green);}
-  .confirm{text-align:center; padding:40px 20px;}
-  .confirm .check{font-size:40px; color:var(--green); margin-bottom:12px;}
-  .topnav{display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;}
-  .topnav .brand{font-family:'Google Sans','Roboto',sans-serif; font-weight:700; font-size:18px; color:var(--purple);}
-  .topnav .who{font-size:13px; color:var(--muted); display:flex; align-items:center; gap:10px;}
-  .link-plain{color:var(--purple); text-decoration:none; font-size:13px; cursor:pointer;}
-  .form-list-item{display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid #f1f1f1;}
-  .form-list-item:last-child{border-bottom:none;}
-  .form-list-title{font-family:'Google Sans','Roboto',sans-serif; font-size:16px;}
-  .form-list-meta{font-size:12px; color:var(--muted); margin-top:2px;}
-  .row-actions{display:flex; gap:14px; align-items:center;}
-  .auth-toggle{font-size:13px; color:var(--muted); margin-top:16px; text-align:center;}
-  .auth-toggle a{color:var(--purple); cursor:pointer;}
-  .empty-state{color:var(--muted); font-size:14px; padding:12px 0;}
+
+  .card{
+    padding:18px;
+  }
+
+  .form-row{
+    grid-template-columns:1fr;
+  }
+
+  .nav{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+
+  .link-box{
+    flex-direction:column;
+  }
+
+  .link-box button{
+    width:100%;
+  }
+}
 </style>
 </head>
+
 <body>
+
 <div class="page" id="app"></div>
 
 <script>
-const app = document.getElementById('app');
-const params = new URLSearchParams(window.location.search);
-const formIdInUrl = params.get('form');
 
-function escapeHtml(str){
-  const d = document.createElement('div');
-  d.innerText = str == null ? '' : str;
-  return d.innerHTML;
+const app = document.getElementById("app");
+
+const params = new URLSearchParams(window.location.search);
+const formId = params.get("form");
+
+
+/* =========================
+   API HELPER
+========================= */
+
+async function api(url, options = {}) {
+
+  try {
+
+    const response = await fetch(url, {
+      credentials: "same-origin",
+      ...options,
+      headers: {
+        ...(options.body ? {"Content-Type":"application/json"} : {}),
+        ...(options.headers || {})
+      }
+    });
+
+    const text = await response.text();
+
+    let data;
+
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Server returned an invalid response.");
+    }
+
+    return data;
+
+  } catch(error) {
+
+    console.error(error);
+
+    return {
+      ok:false,
+      error:error.message || "Network error"
+    };
+
+  }
 }
-async function api(path, opts={}){
-  const res = await fetch(path, {
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
-    ...opts
-  });
-  return res.json();
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHtml(value){
+
+  const div = document.createElement("div");
+
+  div.textContent = value == null ? "" : String(value);
+
+  return div.innerHTML;
+
 }
+
+
+/* =========================
+   START APP
+========================= */
 
 boot();
 
+
 async function boot(){
-  if (formIdInUrl) {
-    renderStudentView(formIdInUrl);
+
+  if(formId){
+
+    renderStudent(formId);
+
     return;
   }
-  const me = await api('/api/me');
-  if (me.teacher) {
-    renderDashboard(me.teacher);
-  } else {
-    renderAuth();
+
+  const result = await api("/api/me");
+
+  if(result.ok && result.teacher){
+
+    renderDashboard(result.teacher);
+
+  }else{
+
+    renderLogin();
+
   }
+
 }
 
-/* ============================================================
-   AUTH: LOGIN / SIGNUP
-============================================================ */
-function renderAuth(mode='login'){
-  const isLogin = mode === 'login';
+
+/* =========================
+   LOGIN
+========================= */
+
+function renderLogin(){
+
   app.innerHTML = `
+
     <div class="top-bar"></div>
+
+    <div class="card main-card">
+
+      <h1>Teacher Login</h1>
+
+      <p class="description">
+        Log in to create and manage elective registration forms.
+      </p>
+
+    </div>
+
+
     <div class="card">
-      <h1 class="static-title">${isLogin ? 'Teacher login' : 'Create a teacher account'}</h1>
-      <p class="static-desc">${isLogin ? 'Log in to create and manage elective registration forms.' : 'One-time signup — after this you never touch any setup again.'}</p>
-    </div>
-    <div class="card question">
-      ${!isLogin ? `<div style="margin-bottom:18px;"><p class="q-label">Your name</p><input class="field-input narrow" id="authName" type="text"></div>` : ''}
-      <div style="margin-bottom:18px;">
-        <p class="q-label">Email<span class="required">*</span></p>
-        <input class="field-input narrow" id="authEmail" type="email">
+
+      <div class="field">
+
+        <label>
+          Email <span class="required">*</span>
+        </label>
+
+        <input
+          id="loginEmail"
+          type="email"
+          placeholder="teacher@example.com"
+        >
+
       </div>
-      <div style="margin-bottom:8px;">
-        <p class="q-label">Password<span class="required">*</span></p>
-        <input class="field-input narrow" id="authPassword" type="password">
+
+
+      <div class="field">
+
+        <label>
+          Password <span class="required">*</span>
+        </label>
+
+        <input
+          id="loginPassword"
+          type="password"
+          placeholder="Password"
+        >
+
       </div>
-      <div class="banner" id="authBanner"></div>
-      <div class="actions-row" style="justify-content:space-between;">
-        <span class="auth-toggle" style="margin:0;">
-          ${isLogin ? `New here? <a id="toggleAuth">Create an account</a>` : `Already have an account? <a id="toggleAuth">Log in</a>`}
+
+
+      <div id="loginMessage"></div>
+
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="loginButton"
+        >
+          Login
+        </button>
+
+      </div>
+
+
+      <div class="auth-switch">
+
+        Don't have an account?
+
+        <span id="showSignup">
+          Create account
         </span>
-        <button class="btn btn-primary" id="authSubmit">${isLogin ? 'Log in' : 'Sign up'}</button>
+
       </div>
+
     </div>
+
   `;
 
-  document.getElementById('toggleAuth').addEventListener('click', () => renderAuth(isLogin ? 'signup' : 'login'));
 
-  document.getElementById('authSubmit').addEventListener('click', async () => {
-    const banner = document.getElementById('authBanner');
-    banner.className = 'banner';
-    const email = document.getElementById('authEmail').value.trim();
-    const password = document.getElementById('authPassword').value;
-    const name = isLogin ? '' : document.getElementById('authName').value.trim();
+  document
+    .getElementById("loginButton")
+    .onclick = login;
 
-    const btn = document.getElementById('authSubmit');
-    btn.disabled = true;
 
-    const result = await api(isLogin ? '/api/login' : '/api/signup', {
-      method: 'POST',
-      body: JSON.stringify({ email, password, name })
-    });
+  document
+    .getElementById("showSignup")
+    .onclick = renderSignup;
 
-    if (result.ok) {
-      const me = await api('/api/me');
-      renderDashboard(me.teacher);
-    } else {
-      banner.textContent = result.error;
-      banner.className = 'banner err show';
-      btn.disabled = false;
-    }
-  });
 }
 
-< truncated lines 174-256 >
-    row.className = 'elective-row';
-    row.innerHTML = `
-      <input class="field-input elective-name" type="text" placeholder="Elective name" value="${escapeHtml(name)}">
-      <input class="field-input vacancy-input" type="number" min="1" placeholder="Seats" value="${escapeHtml(capacity)}">
-      <button type="button" class="remove-row" title="Remove">&times;</button>
-    `;
-    row.querySelector('.remove-row').addEventListener('click', () => row.remove());
-    rowsEl.appendChild(row);
+
+async function login(){
+
+  const email =
+    document.getElementById("loginEmail").value.trim();
+
+  const password =
+    document.getElementById("loginPassword").value;
+
+
+  const button =
+    document.getElementById("loginButton");
+
+  button.disabled = true;
+
+
+  const result = await api("/api/login", {
+
+    method:"POST",
+
+    body:JSON.stringify({
+      email,
+      password
+    })
+
+  });
+
+
+  if(result.ok){
+
+    const me = await api("/api/me");
+
+    renderDashboard(me.teacher);
+
+  }else{
+
+    document.getElementById("loginMessage").innerHTML =
+      `<div class="error">${escapeHtml(result.error)}</div>`;
+
+    button.disabled = false;
+
   }
-  addRow('Data Structures', 30);
-  addRow('Web Development', 30);
-  document.getElementById('addRowBtn').addEventListener('click', () => addRow());
 
-  document.getElementById('createBtn').addEventListener('click', async () => {
-    const banner = document.getElementById('builderBanner');
-    banner.className = 'banner';
+}
 
-    const title = document.getElementById('formTitle').value.trim() || 'Untitled form';
-    const description = document.getElementById('formDesc').value.trim();
+
+/* =========================
+   SIGNUP
+========================= */
+
+function renderSignup(){
+
+  app.innerHTML = `
+
+    <div class="top-bar"></div>
+
+    <div class="card main-card">
+
+      <h1>Create Teacher Account</h1>
+
+      <p class="description">
+        Create your account once and then create your elective forms.
+      </p>
+
+    </div>
+
+
+    <div class="card">
+
+      <div class="field">
+
+        <label>
+          Name
+        </label>
+
+        <input
+          id="signupName"
+          type="text"
+          placeholder="Your name"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Email <span class="required">*</span>
+        </label>
+
+        <input
+          id="signupEmail"
+          type="email"
+          placeholder="teacher@example.com"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Password <span class="required">*</span>
+        </label>
+
+        <input
+          id="signupPassword"
+          type="password"
+          placeholder="At least 6 characters"
+        >
+
+      </div>
+
+
+      <div id="signupMessage"></div>
+
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="signupButton"
+        >
+          Sign Up
+        </button>
+
+      </div>
+
+
+      <div class="auth-switch">
+
+        Already have an account?
+
+        <span id="showLogin">
+          Login
+        </span>
+
+      </div>
+
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("signupButton")
+    .onclick = signup;
+
+
+  document
+    .getElementById("showLogin")
+    .onclick = renderLogin;
+
+}
+
+
+async function signup(){
+
+  const name =
+    document.getElementById("signupName").value.trim();
+
+  const email =
+    document.getElementById("signupEmail").value.trim();
+
+  const password =
+    document.getElementById("signupPassword").value;
+
+
+  const button =
+    document.getElementById("signupButton");
+
+  button.disabled = true;
+
+
+  const result = await api("/api/signup", {
+
+    method:"POST",
+
+    body:JSON.stringify({
+      name,
+      email,
+      password
+    })
+
+  });
+
+
+  if(result.ok){
+
+    const me = await api("/api/me");
+
+    renderDashboard(me.teacher);
+
+  }else{
+
+    document.getElementById("signupMessage").innerHTML =
+      `<div class="error">${escapeHtml(result.error)}</div>`;
+
+    button.disabled = false;
+
+  }
+
+}
+
+
+/* =========================
+   DASHBOARD
+========================= */
+
+async function renderDashboard(teacher){
+
+  app.innerHTML = `
+
+    <div class="nav">
+
+      <div>
+
+        <div class="brand">
+          Elective Registration
+        </div>
+
+        <div class="user">
+          ${escapeHtml(teacher.name || teacher.email)}
+        </div>
+
+      </div>
+
+
+      <div class="actions">
+
+        <button
+          class="secondary"
+          id="logoutButton"
+        >
+          Logout
+        </button>
+
+        <button
+          class="primary"
+          id="newFormButton"
+        >
+          + Create Form
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="dashboardContent">
+      <div class="card center">
+        Loading forms...
+      </div>
+    </div>
+
+  `;
+
+
+  document
+    .getElementById("logoutButton")
+    .onclick = logout;
+
+
+  document
+    .getElementById("newFormButton")
+    .onclick = () => renderBuilder(teacher);
+
+
+  const result = await api("/api/forms");
+
+
+  if(!result.ok){
+
+    document.getElementById("dashboardContent").innerHTML =
+      `<div class="card"><div class="error">${escapeHtml(result.error)}</div></div>`;
+
+    return;
+
+  }
+
+
+  const forms = result.forms || [];
+
+
+  if(forms.length === 0){
+
+    document.getElementById("dashboardContent").innerHTML = `
+
+      <div class="card empty">
+
+        <h2>No forms yet</h2>
+
+        <p>
+          Create your first elective registration form.
+        </p>
+
+        <button
+          class="primary"
+          onclick="renderBuilder()"
+        >
+          + Create Form
+        </button>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  document.getElementById("dashboardContent").innerHTML =
+
+    forms.map(form => `
+
+      <div class="card form-card">
+
+        <div class="form-card-title">
+          ${escapeHtml(form.title)}
+        </div>
+
+        <div class="meta">
+          ${escapeHtml(form.description || "No description")}
+        </div>
+
+        <div class="meta">
+
+          ${form.totalTaken}
+          responses /
+          ${form.totalCapacity}
+          total seats
+
+        </div>
+
+
+        <div class="actions">
+
+          <button
+            class="primary"
+            onclick="openForm('${form.id}')"
+          >
+            Open Link
+          </button>
+
+
+          <button
+            class="secondary"
+            onclick="downloadCSV('${form.id}')"
+          >
+            Download CSV
+          </button>
+
+        </div>
+
+      </div>
+
+    `).join("");
+
+}
+
+
+/* =========================
+   LOGOUT
+========================= */
+
+async function logout(){
+
+  await api("/api/logout", {
+    method:"POST"
+  });
+
+  location.reload();
+
+}
+
+
+/* =========================
+   BUILDER
+========================= */
+
+function renderBuilder(){
+
+  app.innerHTML = `
+
+    <div class="nav">
+
+      <div class="brand">
+        Create Elective Form
+      </div>
+
+      <button
+        class="secondary"
+        id="backButton"
+      >
+        ← Dashboard
+      </button>
+
+    </div>
+
+
+    <div class="card">
+
+      <h1>New Registration Form</h1>
+
+      <div class="field">
+
+        <label>
+          Form title <span class="required">*</span>
+        </label>
+
+        <input
+          id="formTitle"
+          type="text"
+          placeholder="Semester Elective Registration"
+        >
+
+      </div>
+
+
+      <div class="field">
+
+        <label>
+          Description
+        </label>
+
+        <textarea
+          id="formDescription"
+          placeholder="Instructions for students..."
+        ></textarea>
+
+      </div>
+
+    </div>
+
+
+    <div class="card">
+
+      <h2>Electives</h2>
+
+      <p class="description">
+        Add each elective and its maximum number of seats.
+      </p>
+
+
+      <div id="electiveRows"></div>
+
+
+      <button
+        class="secondary"
+        id="addElective"
+      >
+        + Add Elective
+      </button>
+
+    </div>
+
+
+    <div id="builderMessage"></div>
+
+
+    <div class="card">
+
+      <div class="actions">
+
+        <button
+          class="primary"
+          id="createForm"
+        >
+          Create Form
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div id="shareResult"></div>
+
+  `;
+
+
+  document
+    .getElementById("backButton")
+    .onclick = () => location.reload();
+
+
+  const rows =
+    document.getElementById("electiveRows");
+
+
+  function addRow(name="", capacity=""){
+
+    const row =
+      document.createElement("div");
+
+    row.className = "form-row";
+
+
+    row.innerHTML = `
+
+      <input
+        class="electiveName"
+        type="text"
+        placeholder="Elective name"
+        value="${escapeHtml(name)}"
+      >
+
+
+      <input
+        class="electiveCapacity"
+        type="number"
+        min="1"
+        placeholder="Seats"
+        value="${escapeHtml(capacity)}"
+      >
+
+
+      <button
+        class="danger remove"
+        type="button"
+      >
+        Remove
+      </button>
+
+    `;
+
+
+    row
+      .querySelector(".remove")
+      .onclick = () => row.remove();
+
+
+    rows.appendChild(row);
+
+  }
+
+
+  addRow();
+
+
+  document
+    .getElementById("addElective")
+    .onclick = () => addRow();
+
+
+  document
+    .getElementById("createForm")
+    .onclick = async () => {
+
+      const title =
+        document.getElementById("formTitle").value.trim();
+
+      const description =
+        document.getElementById("formDescription").value.trim();
+
+
+      const electives =
+        Array.from(
+          rows.querySelectorAll(".form-row")
+        ).map(row => ({
+
+          name:
+            row.querySelector(".electiveName").value.trim(),
+
+          capacity:
+            Number(
+              row.querySelector(".electiveCapacity").value
+            )
+
+        })).filter(
+          e => e.name && e.capacity > 0
+        );
+
+
+      if(!title){
+
+        showBuilderError("Please enter a form title.");
+
+        return;
+
+      }
+
+
+      if(electives.length === 0){
+
+        showBuilderError(
+          "Add at least one elective with a seat count."
+        );
+
+        return;
+
+      }
+
+
+      const button =
+        document.getElementById("createForm");
+
+      button.disabled = true;
+
+      button.textContent = "Creating...";
+
+
+      const result =
+        await api("/api/forms", {
+
+          method:"POST",
+
+          body:JSON.stringify({
+            title,
+            description,
+            electives
+          })
+
+        });
+
+
+      if(!result.ok){
+
+        showBuilderError(result.error);
+
+        button.disabled = false;
+
+        button.textContent = "Create Form";
+
+        return;
+
+      }
+
+
+      const link =
+        window.location.origin +
+        "/?form=" +
+        encodeURIComponent(result.formId);
+
+
+      document.getElementById("shareResult").innerHTML = `
+
+        <div class="card">
+
+          <h2>Form Created Successfully 🎉</h2>
+
+          <p class="description">
+            Share this link with your students.
+          </p>
+
+
+          <div class="link-box">
+
+            <input
+              id="shareLink"
+              readonly
+              value="${escapeHtml(link)}"
+            >
+
+            <button
+              class="primary"
+              id="copyLink"
+            >
+              Copy
+            </button>
+
+          </div>
+
+
+          <br>
+
+
+          <div class="actions">
+
+            <button
+              class="primary"
+              onclick="openForm('${result.formId}')"
+            >
+              Open Student Form
+            </button>
+
+
+            <button
+              class="secondary"
+              onclick="location.reload()"
+            >
+              Dashboard
+            </button>
+
+          </div>
+
+        </div>
+
+      `;
+
+
+      document
+        .getElementById("copyLink")
+        .onclick = async () => {
+
+          const linkInput =
+            document.getElementById("shareLink");
+
+          try{
+
+            await navigator.clipboard.writeText(
+              linkInput.value
+            );
+
+            document.getElementById("copyLink")
+              .textContent = "Copied!";
+
+          }catch{
+
+            linkInput.select();
+
+            document.execCommand("copy");
+
+            document.getElementById("copyLink")
+              .textContent = "Copied!";
+
+          }
+
+        };
+
+
+      button.textContent = "Created";
+
+    };
+
+
+  function showBuilderError(message){
+
+    document.getElementById("builderMessage").innerHTML =
+      `<div class="error">${escapeHtml(message)}</div>`;
+
+  }
+
+}
+
+
+/* =========================
+   OPEN FORM
+========================= */
+
+function openForm(id){
+
+  window.location.href =
+    "/?form=" +
+    encodeURIComponent(id);
+
+}
+
+
+/* =========================
+   CSV
+========================= */
+
+async function downloadCSV(id){
+
+  try{
+
+    const response =
+      await fetch(
+        "/api/forms/" +
+        encodeURIComponent(id) +
+        "/export",
+        {
+          credentials:"same-origin"
+        }
+      );
+
+
+    if(!response.ok){
+
+      alert("Could not download CSV.");
+
+      return;
+
+    }
+
+
+    const blob =
+      await response.blob();
+
+
+    const url =
+      URL.createObjectURL(blob);
+
+
+    const a =
+      document.createElement("a");
+
+    a.href = url;
+
+    a.download =
+      "elective-responses.csv";
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    a.remove();
+
+    URL.revokeObjectURL(url);
+
+  }catch(error){
+
+    alert("Download failed.");
+
+  }
+
+}
+
+
+/* =========================
+   STUDENT VIEW
+========================= */
+
+async function renderStudent(id){
+
+  app.innerHTML = `
+
+    <div class="top-bar"></div>
+
+    <div class="card center">
+
+      <h2>Loading form...</h2>
+
+    </div>
+
+  `;
+onst description = document.getElementById('formDesc').value.trim();
     const electives = Array.from(rowsEl.querySelectorAll('.elective-row')).map(row => ({
       name: row.querySelector('.elective-name').value.trim(),
       capacity: row.querySelector('.vacancy-input').value
