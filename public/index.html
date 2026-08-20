@@ -205,7 +205,7 @@ function renderAuth(mode='login'){
   app.innerHTML = `
     <div class="top-bar"></div>
     <div class="card">
-      <h1 class="static-title">${isLogin ? 'Teacher login' : 'Create a teacher account'}</h1>
+      <h1 class="static-title">${isLogin ? 'Faculty login' : 'Create a Faculty account'}</h1>
       <p class="static-desc">${isLogin ? 'Log in to create and manage forms and quizzes.' : 'One-time signup — after this you never touch any setup again.'}</p>
     </div>
     <div class="card question">
@@ -326,11 +326,10 @@ function renderForgotPasswordReset(email, question){
     <div class="top-bar"></div>
     <div class="card">
       <h1 class="static-title">Answer &amp; set a new password</h1>
-      <p class="static-desc">${escapeHtml(question)}</p>
     </div>
     <div class="card question">
       <div style="margin-bottom:18px;">
-        <p class="q-label">Your answer<span class="required">*</span></p>
+        <p class="q-label">${escapeHtml(question)}<span class="required">*</span></p>
         <input class="field-input narrow" id="fpAnswer" type="text">
       </div>
       <div style="margin-bottom:8px;">
