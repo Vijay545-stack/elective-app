@@ -8,6 +8,9 @@ const { withLock } = require('./db');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+const QUESTION_TYPES = ['short_answer', 'paragraph', 'multiple_choice', 'checkboxes', 'dropdown', 'elective'];
+const CHOICE_TYPES = ['multiple_choice', 'checkboxes', 'dropdown', 'elective'];
+
 app.use(express.json());
 app.use(session({
   secret: process.env.SESSION_SECRET || 'change-this-secret-in-production',
@@ -27,16 +30,99 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function computeElectiveStatus(form, responses) {
-  const taken = {};
+/* ---------------------- FORM / QUESTION HELPERS ---------------------- */
+
+// Normalizes+validates the teacher-submitted question list into a clean,
+// server-owned shape. Throws with a friendly message on bad input.
+function buildQuestions(questionsInput, isQuiz) {
+  const questions = (Array.isArray(questionsInput) ? questionsInput : []).map(q => {
+    const type = QUESTION_TYPES.includes(q.type) ? q.type : 'short_answer';
+    const label = String(q.label || '').trim();
+    const required = q.required !== false; // default true
+    const question = { id: uuidv4(), type, label, required };
+
+    if (CHOICE_TYPES.includes(type)) {
+      const rawOptions = Array.isArray(q.options) ? q.options : [];
+      question.options = rawOptions
+        .map(o => {
+          const opt = { id: uuidv4(), text: String(o.text || '').trim() };
+          if (type === 'elective') {
+            opt.capacity = Math.max(parseInt(o.capacity, 10) || 0, 0);
+          }
+          return opt;
+        })
+        .filter(o => o.text && (type !== 'elective' || o.capacity > 0));
+
+      if (isQuiz && type !== 'elective') {
+        const correctTexts = new Set(
+          (Array.isArray(q.correctOptionIndexes) ? q.correctOptionIndexes : [])
+            .map(i => rawOptions[i] && String(rawOptions[i].text || '').trim())
+            .filter(Boolean)
+        );
+        question.correctOptionIds = question.options
+          .filter(o => correctTexts.has(o.text))
+          .map(o => o.id);
+        question.points = Math.max(parseInt(q.points, 10) || 1, 0);
+      }
+    }
+    return question;
+  }).filter(q => {
+    if (!q.label) return false;
+    if (CHOICE_TYPES.includes(q.type) && q.options.length < (q.type === 'checkboxes' ? 1 : 2) && q.type !== 'elective') {
+      return q.options.length >= 1; // be lenient; UI already nudges for 2+
+    }
+    if (CHOICE_TYPES.includes(q.type) && !q.options.length) return false;
+    return true;
+  });
+
+  return questions;
+}
+
+// Adds live "taken/remaining" counts to every elective-type question's options.
+function withElectiveStatus(form, responses) {
+  const takenByOptionId = {};
   responses
     .filter(r => r.formId === form.id)
-    .forEach(r => { taken[r.electiveId] = (taken[r.electiveId] || 0) + 1; });
+    .forEach(r => {
+      (r.answers || []).forEach(a => {
+        if (Array.isArray(a.value)) {
+          a.value.forEach(v => { takenByOptionId[v] = (takenByOptionId[v] || 0) + 1; });
+        } else if (a.value) {
+          takenByOptionId[a.value] = (takenByOptionId[a.value] || 0) + 1;
+        }
+      });
+    });
 
-  return form.electives.map(el => {
-    const t = taken[el.id] || 0;
-    return { ...el, taken: t, remaining: Math.max(el.capacity - t, 0) };
+  return {
+    ...form,
+    questions: form.questions.map(q => {
+      if (q.type !== 'elective') return q;
+      return {
+        ...q,
+        options: q.options.map(o => {
+          const taken = takenByOptionId[o.id] || 0;
+          return { ...o, taken, remaining: Math.max(o.capacity - taken, 0) };
+        })
+      };
+    })
+  };
+}
+
+function gradeResponse(form, answers) {
+  if (!form.isQuiz) return { score: null, maxScore: null };
+  let score = 0;
+  let maxScore = 0;
+  form.questions.forEach(q => {
+    if (!CHOICE_TYPES.includes(q.type) || q.type === 'elective' || !q.correctOptionIds) return;
+    maxScore += q.points || 0;
+    const answer = answers.find(a => a.questionId === q.id);
+    if (!answer) return;
+    const given = Array.isArray(answer.value) ? answer.value.slice().sort() : [answer.value];
+    const correct = q.correctOptionIds.slice().sort();
+    const isMatch = given.length === correct.length && given.every((v, i) => v === correct[i]);
+    if (isMatch) score += q.points || 0;
   });
+  return { score, maxScore };
 }
 
 /* ---------------------- AUTH ---------------------- */
@@ -155,18 +241,11 @@ app.post('/api/forms', requireAuth, async (req, res) => {
   const description = String(req.body.description || '').trim();
   const collegeName = String(req.body.collegeName || '').trim();
   const department = String(req.body.department || '').trim();
-  const electivesInput = Array.isArray(req.body.electives) ? req.body.electives : [];
+  const isQuiz = !!req.body.isQuiz;
 
-  const electives = electivesInput
-    .map(el => ({
-      id: uuidv4(),
-      name: String(el.name || '').trim(),
-      capacity: Math.max(parseInt(el.capacity, 10) || 0, 0)
-    }))
-    .filter(el => el.name && el.capacity > 0);
-
-  if (!electives.length) {
-    return res.status(400).json({ ok: false, error: 'Add at least one elective with a seat count above 0.' });
+  const questions = buildQuestions(req.body.questions, isQuiz);
+  if (!questions.length) {
+    return res.status(400).json({ ok: false, error: 'Add at least one question.' });
   }
 
   const formId = await withLock(async (data) => {
@@ -178,7 +257,8 @@ app.post('/api/forms', requireAuth, async (req, res) => {
       description,
       collegeName,
       department,
-      electives,
+      isQuiz,
+      questions,
       closed: false,
       createdAt: new Date().toISOString()
     });
@@ -193,22 +273,28 @@ app.get('/api/forms', requireAuth, (req, res) => {
   const data = require('./db').load();
   const myForms = data.forms.filter(f => f.teacherId === req.session.teacherId);
   const withCounts = myForms.map(f => {
-    const status = computeElectiveStatus(f, data.responses);
-    const totalTaken = status.reduce((sum, el) => sum + el.taken, 0);
-    const totalCapacity = status.reduce((sum, el) => sum + el.capacity, 0);
+    const responseCount = data.responses.filter(r => r.formId === f.id).length;
     return {
       id: f.id,
       title: f.title,
       description: f.description,
       collegeName: f.collegeName || '',
       department: f.department || '',
+      isQuiz: !!f.isQuiz,
+      questionCount: f.questions.length,
       closed: !!f.closed,
       createdAt: f.createdAt,
-      totalTaken,
-      totalCapacity
+      responseCount
     };
   }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
   res.json({ ok: true, forms: withCounts });
+});
+
+app.get('/api/forms/:id', requireAuth, (req, res) => {
+  const data = require('./db').load();
+  const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
+  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
+  res.json({ ok: true, form });
 });
 
 app.get('/api/forms/:id/export', requireAuth, (req, res) => {
@@ -217,14 +303,20 @@ app.get('/api/forms/:id/export', requireAuth, (req, res) => {
   if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
 
   const rows = data.responses.filter(r => r.formId === form.id);
-  const electiveNameById = Object.fromEntries(form.electives.map(el => [el.id, el.name]));
+  const optionTextById = {};
+  form.questions.forEach(q => (q.options || []).forEach(o => { optionTextById[o.id] = o.text; }));
 
-  const csvLines = ['Timestamp,Student Name,Register Number,Department,Elective,Email'];
+  const header = ['Timestamp', 'Student Name', 'Register Number', 'Department', 'Email']
+    .concat(form.questions.map(q => q.label))
+    .concat(form.isQuiz ? ['Score'] : []);
+  const csvLines = [header.map(csvEscape).join(',')];
+
   rows.forEach(r => {
-    const line = [r.createdAt, r.name, r.registerNo, r.department || '', electiveNameById[r.electiveId] || '', r.email]
-      .map(v => `"${String(v).replace(/"/g, '""')}"`)
-      .join(',');
-    csvLines.push(line);
+    const answerByQ = Object.fromEntries((r.answers || []).map(a => [a.questionId, a.value]));
+    const row = [r.createdAt, r.name, r.registerNo, r.department || '', r.email]
+      .concat(form.questions.map(q => formatAnswer(answerByQ[q.id], optionTextById)))
+      .concat(form.isQuiz ? [`${r.score ?? ''}/${r.maxScore ?? ''}`] : []);
+    csvLines.push(row.map(csvEscape).join(','));
   });
 
   res.setHeader('Content-Type', 'text/csv');
@@ -232,12 +324,23 @@ app.get('/api/forms/:id/export', requireAuth, (req, res) => {
   res.send(csvLines.join('\n'));
 });
 
+function csvEscape(v) {
+  return `"${String(v == null ? '' : v).replace(/"/g, '""')}"`;
+}
+function formatAnswer(value, optionTextById) {
+  if (value == null) return '';
+  if (Array.isArray(value)) return value.map(v => optionTextById[v] || v).join('; ');
+  return optionTextById[value] || value;
+}
+
 app.get('/api/forms/:id/responses', requireAuth, (req, res) => {
   const data = require('./db').load();
   const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
   if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
 
-  const electiveNameById = Object.fromEntries(form.electives.map(el => [el.id, el.name]));
+  const optionTextById = {};
+  form.questions.forEach(q => (q.options || []).forEach(o => { optionTextById[o.id] = o.text; }));
+
   const rows = data.responses
     .filter(r => r.formId === form.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
@@ -246,11 +349,20 @@ app.get('/api/forms/:id/responses', requireAuth, (req, res) => {
       registerNo: r.registerNo,
       department: r.department || '',
       email: r.email,
-      elective: electiveNameById[r.electiveId] || '(removed elective)',
-      createdAt: r.createdAt
+      createdAt: r.createdAt,
+      score: r.score,
+      maxScore: r.maxScore,
+      answers: (r.answers || []).map(a => {
+        const q = form.questions.find(qq => qq.id === a.questionId);
+        return {
+          questionId: a.questionId,
+          label: q ? q.label : '(removed question)',
+          value: formatAnswer(a.value, optionTextById)
+        };
+      })
     }));
 
-  res.json({ ok: true, responses: rows });
+  res.json({ ok: true, form: { title: form.title, isQuiz: !!form.isQuiz, questions: form.questions }, responses: rows });
 });
 
 app.patch('/api/forms/:id', requireAuth, async (req, res) => {
@@ -290,7 +402,7 @@ app.get('/api/public/forms/:id', (req, res) => {
   const form = data.forms.find(f => f.id === req.params.id);
   if (!form) return res.status(404).json({ ok: false, error: 'This form does not exist or was removed.' });
 
-  const status = computeElectiveStatus(form, data.responses);
+  const withStatus = withElectiveStatus(form, data.responses);
   res.json({
     ok: true,
     form: {
@@ -299,8 +411,13 @@ app.get('/api/public/forms/:id', (req, res) => {
       description: form.description,
       collegeName: form.collegeName || '',
       department: form.department || '',
+      isQuiz: !!form.isQuiz,
       closed: !!form.closed,
-      electives: status
+      // Never leak correct answers to the public form.
+      questions: withStatus.questions.map(q => {
+        const { correctOptionIds, ...rest } = q;
+        return rest;
+      })
     }
   });
 });
@@ -311,10 +428,10 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
   const registerNo = String(req.body.registerNo || '').trim();
   const department = String(req.body.department || '').trim();
   const email = String(req.body.email || '').trim();
-  const electiveId = String(req.body.electiveId || '').trim();
+  const answersInput = Array.isArray(req.body.answers) ? req.body.answers : [];
 
-  if (!name || !registerNo || !department || !email || !electiveId) {
-    return res.status(400).json({ ok: false, error: 'All fields are required.' });
+  if (!name || !registerNo || !department || !email) {
+    return res.status(400).json({ ok: false, error: 'Please fill in your name, register number, department, and email.' });
   }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailPattern.test(email)) {
@@ -322,7 +439,7 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
   }
 
   try {
-    const message = await withLock(async (data) => {
+    const result = await withLock(async (data) => {
       const form = data.forms.find(f => f.id === formId);
       if (!form) throw new Error('This form does not exist or was removed.');
       if (form.closed) throw new Error('This form is closed and no longer accepting responses.');
@@ -332,31 +449,66 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
       );
       if (alreadyRegistered) throw new Error('This register number has already submitted a response for this form.');
 
-      const elective = form.electives.find(el => el.id === electiveId);
-      if (!elective) throw new Error('That elective no longer exists on this form.');
+      const answerByQ = Object.fromEntries(answersInput.map(a => [a.questionId, a.value]));
+      const cleanAnswers = [];
+      const electiveStatus = withElectiveStatus(form, data.responses);
 
-      const status = computeElectiveStatus(form, data.responses);
-      const liveElective = status.find(el => el.id === electiveId);
-      if (liveElective.remaining <= 0) throw new Error('Sorry, that elective just filled up. Please pick another.');
+      for (const q of form.questions) {
+        const raw = answerByQ[q.id];
+        const isEmpty = raw == null || raw === '' || (Array.isArray(raw) && raw.length === 0);
+        if (q.required && isEmpty) {
+          throw new Error(`Please answer: "${q.label}"`);
+        }
+        if (isEmpty) continue;
+
+        if (q.type === 'checkboxes') {
+          const values = Array.isArray(raw) ? raw.map(String) : [String(raw)];
+          const validIds = new Set(q.options.map(o => o.id));
+          const filtered = values.filter(v => validIds.has(v));
+          cleanAnswers.push({ questionId: q.id, value: filtered });
+        } else if (CHOICE_TYPES.includes(q.type)) {
+          const value = String(raw);
+          const opt = q.options.find(o => o.id === value);
+          if (!opt) throw new Error(`Invalid choice for: "${q.label}"`);
+          if (q.type === 'elective') {
+            const liveOpt = electiveStatus.questions.find(qq => qq.id === q.id).options.find(o => o.id === value);
+            if (liveOpt.remaining <= 0) throw new Error(`Sorry, "${opt.text}" just filled up. Please pick another option for "${q.label}".`);
+          }
+          cleanAnswers.push({ questionId: q.id, value });
+        } else {
+          cleanAnswers.push({ questionId: q.id, value: String(raw).trim() });
+        }
+      }
+
+      const { score, maxScore } = gradeResponse(form, cleanAnswers);
 
       data.responses.push({
         id: uuidv4(),
         formId,
-        electiveId,
         name,
         registerNo,
         department,
         email,
+        answers: cleanAnswers,
+        score,
+        maxScore,
         createdAt: new Date().toISOString()
       });
       require('./db').save(data);
-      return `You're registered for ${elective.name}.`;
+      return { score, maxScore };
     });
-    res.json({ ok: true, message });
+
+    const message = form_isQuizMessage(result);
+    res.json({ ok: true, message, score: result.score, maxScore: result.maxScore });
   } catch (err) {
     res.status(400).json({ ok: false, error: err.message });
   }
 });
+
+function form_isQuizMessage(result) {
+  if (result.maxScore == null) return 'Your response has been recorded.';
+  return `Your response has been recorded. You scored ${result.score} out of ${result.maxScore}.`;
+}
 
 // Unknown API routes get a proper JSON 404 instead of silently returning the HTML page
 app.use('/api', (req, res) => {
@@ -369,5 +521,5 @@ app.get('*', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Elective registration server running on http://localhost:${PORT}`);
+  console.log(`Form builder server running on http://localhost:${PORT}`);
 });

@@ -1,7 +1,7 @@
 {
-  "name": "elective-registration",
-  "version": "1.0.0",
-  "description": "Google-Forms-style elective registration with a real backend (Node/Express + JSON file database).",
+  "name": "form-builder-app",
+  "version": "2.0.0",
+  "description": "Google-Forms-style form builder with quizzes and seat-limited elective picks",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -11,5 +11,8 @@
     "express-session": "^1.18.0",
     "bcryptjs": "^2.4.3",
     "uuid": "^9.0.1"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
