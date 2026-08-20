@@ -1,26 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
+
 <title>Elective Registration</title>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="preconnect"
+      href="https://fonts.googleapis.com">
+
+<link rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin>
+
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&display=swap"
+      rel="stylesheet">
+
 
 <style>
+
 :root{
   --purple:#673ab7;
-  --purple-dark:#5e35b1;
-  --bg:#f0ebf8;
-  --card:#fff;
+  --purple-dark:#512da8;
+  --purple-light:#ede7f6;
+  --bg:#f5f2fa;
+  --card:#ffffff;
   --line:#dadce0;
   --text:#202124;
   --muted:#5f6368;
   --red:#d93025;
   --green:#188038;
   --orange:#e37400;
+  --blue:#1a73e8;
 }
 
 *{
@@ -42,37 +56,45 @@ body{
 
 .top-bar{
   height:10px;
-  background:var(--purple);
-  border-radius:8px 8px 0 0;
+  background:linear-gradient(
+    90deg,
+    #673ab7,
+    #7e57c2,
+    #9575cd
+  );
+  border-radius:10px 10px 0 0;
 }
 
 .card{
-  background:white;
+  background:var(--card);
   border:1px solid var(--line);
-  border-radius:8px;
+  border-radius:10px;
   padding:24px;
   margin-bottom:18px;
+  box-shadow:0 2px 5px rgba(0,0,0,.04);
 }
 
 .main-card{
-  border-radius:0 0 8px 8px;
+  border-radius:0 0 10px 10px;
 }
 
 h1{
   font-family:"Google Sans",Roboto,sans-serif;
   font-size:28px;
-  font-weight:400;
+  font-weight:500;
   margin:0 0 10px;
 }
 
 h2{
   font-family:"Google Sans",Roboto,sans-serif;
   font-weight:500;
+  margin-top:0;
 }
 
 .description{
   color:var(--muted);
   font-size:14px;
+  line-height:1.6;
   white-space:pre-wrap;
 }
 
@@ -80,6 +102,7 @@ label{
   display:block;
   font-size:14px;
   margin-bottom:7px;
+  font-weight:500;
 }
 
 .required{
@@ -91,20 +114,22 @@ textarea{
   width:100%;
   padding:12px;
   border:1px solid #aaa;
-  border-radius:4px;
+  border-radius:5px;
   font-size:15px;
   font-family:Roboto,sans-serif;
-}
-
-textarea{
-  min-height:100px;
-  resize:vertical;
+  background:white;
 }
 
 input:focus,
 textarea:focus{
   outline:none;
   border:2px solid var(--purple);
+  padding:11px;
+}
+
+textarea{
+  min-height:100px;
+  resize:vertical;
 }
 
 .field{
@@ -113,12 +138,17 @@ textarea:focus{
 
 button{
   border:none;
-  border-radius:5px;
+  border-radius:6px;
   padding:11px 20px;
   font-family:"Google Sans",Roboto,sans-serif;
   font-size:14px;
   font-weight:500;
   cursor:pointer;
+  transition:.2s;
+}
+
+button:hover{
+  transform:translateY(-1px);
 }
 
 .primary{
@@ -136,15 +166,24 @@ button{
   border:1px solid var(--purple);
 }
 
+.secondary:hover{
+  background:var(--purple-light);
+}
+
 .danger{
   background:white;
   color:var(--red);
   border:1px solid #ddd;
 }
 
+.danger:hover{
+  background:#fce8e6;
+}
+
 button:disabled{
   opacity:.6;
   cursor:not-allowed;
+  transform:none;
 }
 
 .actions{
@@ -155,7 +194,7 @@ button:disabled{
 }
 
 .auth-switch{
-  margin-top:18px;
+  margin-top:20px;
   text-align:center;
   color:var(--muted);
   font-size:14px;
@@ -164,21 +203,23 @@ button:disabled{
 .auth-switch span{
   color:var(--purple);
   cursor:pointer;
+  font-weight:500;
 }
 
 .error{
   background:#fce8e6;
   color:var(--red);
   padding:12px;
-  border-radius:5px;
+  border-radius:6px;
   margin:12px 0;
+  line-height:1.5;
 }
 
 .success{
   background:#e6f4ea;
   color:var(--green);
   padding:12px;
-  border-radius:5px;
+  border-radius:6px;
   margin:12px 0;
 }
 
@@ -187,24 +228,25 @@ button:disabled{
   justify-content:space-between;
   align-items:center;
   margin-bottom:20px;
-  gap:10px;
+  gap:15px;
 }
 
 .brand{
   color:var(--purple);
-  font-family:"Google Sans";
-  font-size:20px;
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:21px;
   font-weight:700;
 }
 
 .user{
   color:var(--muted);
   font-size:13px;
+  margin-top:3px;
 }
 
 .form-row{
   display:grid;
-  grid-template-columns:1fr 120px 80px;
+  grid-template-columns:1fr 120px 90px;
   gap:10px;
   margin-bottom:12px;
   align-items:center;
@@ -215,9 +257,10 @@ button:disabled{
 }
 
 .form-card-title{
-  font-family:"Google Sans";
-  font-size:18px;
-  margin-bottom:5px;
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:19px;
+  font-weight:500;
+  margin-bottom:6px;
 }
 
 .meta{
@@ -226,15 +269,20 @@ button:disabled{
   margin-bottom:15px;
 }
 
-.elective{
-  border-bottom:1px solid #eee;
-  padding:10px 0;
+.stats{
   display:flex;
-  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
 }
 
-.elective:last-child{
-  border-bottom:none;
+.stat{
+  background:var(--purple-light);
+  color:var(--purple);
+  padding:7px 12px;
+  border-radius:20px;
+  font-size:12px;
+  font-weight:500;
 }
 
 .link-box{
@@ -243,7 +291,7 @@ button:disabled{
   background:#f3edfb;
   padding:10px;
   border:1px solid var(--purple);
-  border-radius:5px;
+  border-radius:6px;
   margin-top:15px;
 }
 
@@ -252,6 +300,7 @@ button:disabled{
   border:none;
   background:transparent;
   min-width:0;
+  color:var(--text);
 }
 
 .option{
@@ -262,14 +311,20 @@ button:disabled{
   border-bottom:1px solid #eee;
 }
 
+.option:last-child{
+  border-bottom:none;
+}
+
 .option input{
   width:auto;
+  accent-color:var(--purple);
 }
 
 .option label{
   flex:1;
   margin:0;
   cursor:pointer;
+  font-weight:400;
 }
 
 .seats{
@@ -300,8 +355,9 @@ button:disabled{
 }
 
 .check{
-  font-size:50px;
+  font-size:55px;
   color:var(--green);
+  font-weight:bold;
 }
 
 .center{
@@ -311,7 +367,40 @@ button:disabled{
 .empty{
   color:var(--muted);
   text-align:center;
-  padding:25px;
+  padding:30px;
+}
+
+.student-header{
+  text-align:center;
+  padding:10px 0 20px;
+}
+
+.student-header .college{
+  color:var(--purple);
+  font-size:13px;
+  font-weight:500;
+  text-transform:uppercase;
+  letter-spacing:.5px;
+}
+
+.student-header .title{
+  color:var(--text);
+  font-family:"Google Sans",Roboto,sans-serif;
+  font-size:18px;
+  font-weight:500;
+  margin-top:5px;
+}
+
+.form-info{
+  border-left:4px solid var(--purple);
+  padding-left:15px;
+  margin-bottom:20px;
+}
+
+.loading{
+  text-align:center;
+  color:var(--muted);
+  padding:30px;
 }
 
 @media(max-width:600px){
@@ -333,6 +422,14 @@ button:disabled{
     flex-direction:column;
   }
 
+  .nav .actions{
+    width:100%;
+  }
+
+  .nav button{
+    flex:1;
+  }
+
   .link-box{
     flex-direction:column;
   }
@@ -340,61 +437,108 @@ button:disabled{
   .link-box button{
     width:100%;
   }
+
+  .actions button{
+    min-height:42px;
+  }
+
 }
+
 </style>
+
 </head>
+
 
 <body>
 
 <div class="page" id="app"></div>
 
+
 <script>
 
-const app = document.getElementById("app");
+const app =
+  document.getElementById("app");
 
-const params = new URLSearchParams(window.location.search);
-const formId = params.get("form");
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const formId =
+  params.get("form");
 
 
 /* =========================
    API HELPER
 ========================= */
 
-async function api(url, options = {}) {
+async function api(url, options = {}){
 
-  try {
+  try{
 
-    const response = await fetch(url, {
-      credentials: "same-origin",
-      ...options,
-      headers: {
-        ...(options.body ? {"Content-Type":"application/json"} : {}),
-        ...(options.headers || {})
-      }
-    });
+    const response =
+      await fetch(url,{
 
-    const text = await response.text();
+        credentials:"same-origin",
+
+        ...options,
+
+        headers:{
+
+          ...(options.body
+            ? {"Content-Type":"application/json"}
+            : {}),
+
+          ...(options.headers || {})
+
+        }
+
+      });
+
+
+    const text =
+      await response.text();
+
 
     let data;
 
-    try {
-      data = JSON.parse(text);
-    } catch {
-      throw new Error("Server returned an invalid response.");
+
+    try{
+
+      data =
+        JSON.parse(text);
+
+    }catch{
+
+      throw new Error(
+        "Server returned an invalid response."
+      );
+
     }
+
 
     return data;
 
-  } catch(error) {
+
+  }catch(error){
 
     console.error(error);
 
-    return {
+
+    return{
+
       ok:false,
-      error:error.message || "Network error"
+
+      error:
+        error.message ||
+        "Network error"
+
     };
 
   }
+
 }
 
 
@@ -404,9 +548,15 @@ async function api(url, options = {}) {
 
 function escapeHtml(value){
 
-  const div = document.createElement("div");
+  const div =
+    document.createElement("div");
 
-  div.textContent = value == null ? "" : String(value);
+
+  div.textContent =
+    value == null
+      ? ""
+      : String(value);
+
 
   return div.innerHTML;
 
@@ -427,13 +577,22 @@ async function boot(){
     renderStudent(formId);
 
     return;
+
   }
 
-  const result = await api("/api/me");
 
-  if(result.ok && result.teacher){
+  const result =
+    await api("/api/me");
 
-    renderDashboard(result.teacher);
+
+  if(
+    result.ok &&
+    result.teacher
+  ){
+
+    renderDashboard(
+      result.teacher
+    );
 
   }else{
 
@@ -456,10 +615,13 @@ function renderLogin(){
 
     <div class="card main-card">
 
-      <h1>Teacher Login</h1>
+      <h1>
+        Teacher Login
+      </h1>
 
       <p class="description">
-        Log in to create and manage elective registration forms.
+        Log in to create and manage
+        elective registration forms.
       </p>
 
     </div>
@@ -470,7 +632,8 @@ function renderLogin(){
       <div class="field">
 
         <label>
-          Email <span class="required">*</span>
+          Email
+          <span class="required">*</span>
         </label>
 
         <input
@@ -485,7 +648,8 @@ function renderLogin(){
       <div class="field">
 
         <label>
-          Password <span class="required">*</span>
+          Password
+          <span class="required">*</span>
         </label>
 
         <input
@@ -539,43 +703,82 @@ function renderLogin(){
 }
 
 
+/* =========================
+   LOGIN ACTION
+========================= */
+
 async function login(){
 
   const email =
-    document.getElementById("loginEmail").value.trim();
+    document
+      .getElementById("loginEmail")
+      .value
+      .trim();
+
 
   const password =
-    document.getElementById("loginPassword").value;
+    document
+      .getElementById("loginPassword")
+      .value;
 
 
   const button =
-    document.getElementById("loginButton");
+    document
+      .getElementById("loginButton");
+
 
   button.disabled = true;
 
 
-  const result = await api("/api/login", {
+  const result =
+    await api(
+      "/api/login",
+      {
 
-    method:"POST",
+        method:"POST",
 
-    body:JSON.stringify({
-      email,
-      password
-    })
+        body:JSON.stringify({
 
-  });
+          email,
+          password
+
+        })
+
+      }
+    );
 
 
   if(result.ok){
 
-    const me = await api("/api/me");
+    const me =
+      await api("/api/me");
 
-    renderDashboard(me.teacher);
+
+    if(
+      me.ok &&
+      me.teacher
+    ){
+
+      renderDashboard(
+        me.teacher
+      );
+
+    }else{
+
+      renderLogin();
+
+    }
 
   }else{
 
-    document.getElementById("loginMessage").innerHTML =
-      `<div class="error">${escapeHtml(result.error)}</div>`;
+    document
+      .getElementById("loginMessage")
+      .innerHTML =
+
+      `<div class="error">
+        ${escapeHtml(result.error)}
+      </div>`;
+
 
     button.disabled = false;
 
@@ -596,10 +799,13 @@ function renderSignup(){
 
     <div class="card main-card">
 
-      <h1>Create Teacher Account</h1>
+      <h1>
+        Create Teacher Account
+      </h1>
 
       <p class="description">
-        Create your account once and then create your elective forms.
+        Create your account once and then
+        create your elective registration forms.
       </p>
 
     </div>
@@ -625,7 +831,8 @@ function renderSignup(){
       <div class="field">
 
         <label>
-          Email <span class="required">*</span>
+          Email
+          <span class="required">*</span>
         </label>
 
         <input
@@ -640,7 +847,8 @@ function renderSignup(){
       <div class="field">
 
         <label>
-          Password <span class="required">*</span>
+          Password
+          <span class="required">*</span>
         </label>
 
         <input
@@ -694,47 +902,86 @@ function renderSignup(){
 }
 
 
+/* =========================
+   SIGNUP ACTION
+========================= */
+
 async function signup(){
 
   const name =
-    document.getElementById("signupName").value.trim();
+    document
+      .getElementById("signupName")
+      .value
+      .trim();
+
 
   const email =
-    document.getElementById("signupEmail").value.trim();
+    document
+      .getElementById("signupEmail")
+      .value
+      .trim();
+
 
   const password =
-    document.getElementById("signupPassword").value;
+    document
+      .getElementById("signupPassword")
+      .value;
 
 
   const button =
-    document.getElementById("signupButton");
+    document
+      .getElementById("signupButton");
+
 
   button.disabled = true;
 
 
-  const result = await api("/api/signup", {
+  const result =
+    await api(
+      "/api/signup",
+      {
 
-    method:"POST",
+        method:"POST",
 
-    body:JSON.stringify({
-      name,
-      email,
-      password
-    })
+        body:JSON.stringify({
 
-  });
+          name,
+          email,
+          password
+
+        })
+
+      }
+    );
 
 
   if(result.ok){
 
-    const me = await api("/api/me");
+    const me =
+      await api("/api/me");
 
-    renderDashboard(me.teacher);
+
+    if(
+      me.ok &&
+      me.teacher
+    ){
+
+      renderDashboard(
+        me.teacher
+      );
+
+    }
 
   }else{
 
-    document.getElementById("signupMessage").innerHTML =
-      `<div class="error">${escapeHtml(result.error)}</div>`;
+    document
+      .getElementById("signupMessage")
+      .innerHTML =
+
+      `<div class="error">
+        ${escapeHtml(result.error)}
+      </div>`;
+
 
     button.disabled = false;
 
@@ -760,7 +1007,11 @@ async function renderDashboard(teacher){
         </div>
 
         <div class="user">
-          ${escapeHtml(teacher.name || teacher.email)}
+          Welcome,
+          ${escapeHtml(
+            teacher.name ||
+            teacher.email
+          )}
         </div>
 
       </div>
@@ -788,9 +1039,13 @@ async function renderDashboard(teacher){
 
 
     <div id="dashboardContent">
+
       <div class="card center">
-        Loading forms...
+        <div class="loading">
+          Loading forms...
+        </div>
       </div>
+
     </div>
 
   `;
@@ -803,40 +1058,55 @@ async function renderDashboard(teacher){
 
   document
     .getElementById("newFormButton")
-    .onclick = () => renderBuilder(teacher);
+    .onclick =
+      () => renderBuilder();
 
 
-  const result = await api("/api/forms");
+  const result =
+    await api("/api/forms");
 
 
   if(!result.ok){
 
-    document.getElementById("dashboardContent").innerHTML =
-      `<div class="card"><div class="error">${escapeHtml(result.error)}</div></div>`;
+    document
+      .getElementById("dashboardContent")
+      .innerHTML =
+
+      `<div class="card">
+        <div class="error">
+          ${escapeHtml(result.error)}
+        </div>
+      </div>`;
 
     return;
 
   }
 
 
-  const forms = result.forms || [];
+  const forms =
+    result.forms || [];
 
 
   if(forms.length === 0){
 
-    document.getElementById("dashboardContent").innerHTML = `
+    document
+      .getElementById("dashboardContent")
+      .innerHTML = `
 
       <div class="card empty">
 
-        <h2>No forms yet</h2>
+        <h2>
+          No forms yet
+        </h2>
 
         <p>
-          Create your first elective registration form.
+          Create your first elective
+          registration form.
         </p>
 
         <button
           class="primary"
-          onclick="renderBuilder()"
+          id="emptyCreateButton"
         >
           + Create Form
         </button>
@@ -845,31 +1115,54 @@ async function renderDashboard(teacher){
 
     `;
 
+
+    document
+      .getElementById("emptyCreateButton")
+      .onclick =
+        () => renderBuilder();
+
+
     return;
 
   }
 
 
-  document.getElementById("dashboardContent").innerHTML =
+  document
+    .getElementById("dashboardContent")
+    .innerHTML =
 
     forms.map(form => `
 
       <div class="card form-card">
 
         <div class="form-card-title">
+
           ${escapeHtml(form.title)}
+
         </div>
 
-        <div class="meta">
-          ${escapeHtml(form.description || "No description")}
-        </div>
 
         <div class="meta">
 
-          ${form.totalTaken}
-          responses /
-          ${form.totalCapacity}
-          total seats
+          ${escapeHtml(
+            form.description ||
+            "No description"
+          )}
+
+        </div>
+
+
+        <div class="stats">
+
+          <span class="stat">
+            ${form.totalTaken}
+            responses
+          </span>
+
+          <span class="stat">
+            ${form.totalCapacity}
+            total seats
+          </span>
 
         </div>
 
@@ -880,7 +1173,7 @@ async function renderDashboard(teacher){
             class="primary"
             onclick="openForm('${form.id}')"
           >
-            Open Link
+            Open Student Form
           </button>
 
 
@@ -906,9 +1199,13 @@ async function renderDashboard(teacher){
 
 async function logout(){
 
-  await api("/api/logout", {
-    method:"POST"
-  });
+  await api(
+    "/api/logout",
+    {
+      method:"POST"
+    }
+  );
+
 
   location.reload();
 
@@ -916,7 +1213,7 @@ async function logout(){
 
 
 /* =========================
-   BUILDER
+   FORM BUILDER
 ========================= */
 
 function renderBuilder(){
@@ -941,12 +1238,15 @@ function renderBuilder(){
 
     <div class="card">
 
-      <h1>New Registration Form</h1>
+      <h1>
+        New Registration Form
+      </h1>
 
       <div class="field">
 
         <label>
-          Form title <span class="required">*</span>
+          Form title
+          <span class="required">*</span>
         </label>
 
         <input
@@ -976,10 +1276,13 @@ function renderBuilder(){
 
     <div class="card">
 
-      <h2>Electives</h2>
+      <h2>
+        Electives
+      </h2>
 
       <p class="description">
-        Add each elective and its maximum number of seats.
+        Add each elective and its maximum
+        number of seats.
       </p>
 
 
@@ -1026,15 +1329,22 @@ function renderBuilder(){
 
 
   const rows =
-    document.getElementById("electiveRows");
+    document.getElementById(
+      "electiveRows"
+    );
 
 
-  function addRow(name="", capacity=""){
+  function addRow(
+    name = "",
+    capacity = ""
+  ){
 
     const row =
       document.createElement("div");
 
-    row.className = "form-row";
+
+    row.className =
+      "form-row";
 
 
     row.innerHTML = `
@@ -1068,7 +1378,8 @@ function renderBuilder(){
 
     row
       .querySelector(".remove")
-      .onclick = () => row.remove();
+      .onclick =
+        () => row.remove();
 
 
     rows.appendChild(row);
@@ -1081,7 +1392,8 @@ function renderBuilder(){
 
   document
     .getElementById("addElective")
-    .onclick = () => addRow();
+    .onclick =
+      () => addRow();
 
 
   document
@@ -1089,33 +1401,57 @@ function renderBuilder(){
     .onclick = async () => {
 
       const title =
-        document.getElementById("formTitle").value.trim();
+        document
+          .getElementById("formTitle")
+          .value
+          .trim();
+
 
       const description =
-        document.getElementById("formDescription").value.trim();
+        document
+          .getElementById("formDescription")
+          .value
+          .trim();
 
 
       const electives =
         Array.from(
-          rows.querySelectorAll(".form-row")
-        ).map(row => ({
+          rows.querySelectorAll(
+            ".form-row"
+          )
+        )
+        .map(row => ({
 
           name:
-            row.querySelector(".electiveName").value.trim(),
+            row
+              .querySelector(
+                ".electiveName"
+              )
+              .value
+              .trim(),
 
           capacity:
             Number(
-              row.querySelector(".electiveCapacity").value
+              row
+                .querySelector(
+                  ".electiveCapacity"
+                )
+                .value
             )
 
-        })).filter(
-          e => e.name && e.capacity > 0
+        }))
+        .filter(
+          e =>
+            e.name &&
+            e.capacity > 0
         );
 
 
       if(!title){
 
-        showBuilderError("Please enter a form title.");
+        showBuilderError(
+          "Please enter a form title."
+        );
 
         return;
 
@@ -1134,34 +1470,47 @@ function renderBuilder(){
 
 
       const button =
-        document.getElementById("createForm");
+        document.getElementById(
+          "createForm"
+        );
+
 
       button.disabled = true;
 
-      button.textContent = "Creating...";
+      button.textContent =
+        "Creating...";
 
 
       const result =
-        await api("/api/forms", {
+        await api(
+          "/api/forms",
+          {
 
-          method:"POST",
+            method:"POST",
 
-          body:JSON.stringify({
-            title,
-            description,
-            electives
-          })
+            body:JSON.stringify({
 
-        });
+              title,
+
+              description,
+              electives
+
+            })
+
+          }
+        );
 
 
       if(!result.ok){
 
-        showBuilderError(result.error);
+        showBuilderError(
+          result.error
+        );
 
         button.disabled = false;
 
-        button.textContent = "Create Form";
+        button.textContent =
+          "Create Form";
 
         return;
 
@@ -1171,14 +1520,20 @@ function renderBuilder(){
       const link =
         window.location.origin +
         "/?form=" +
-        encodeURIComponent(result.formId);
+        encodeURIComponent(
+          result.formId
+        );
 
 
-      document.getElementById("shareResult").innerHTML = `
+      document
+        .getElementById("shareResult")
+        .innerHTML = `
 
         <div class="card">
 
-          <h2>Form Created Successfully 🎉</h2>
+          <h2>
+            Form Created Successfully 🎉
+          </h2>
 
           <p class="description">
             Share this link with your students.
@@ -1235,40 +1590,59 @@ function renderBuilder(){
         .onclick = async () => {
 
           const linkInput =
-            document.getElementById("shareLink");
+            document.getElementById(
+              "shareLink"
+            );
 
           try{
 
-            await navigator.clipboard.writeText(
-              linkInput.value
-            );
+            await navigator.clipboard
+              .writeText(
+                linkInput.value
+              );
 
-            document.getElementById("copyLink")
-              .textContent = "Copied!";
+            document
+              .getElementById("copyLink")
+              .textContent =
+              "Copied!";
 
           }catch{
 
             linkInput.select();
 
-            document.execCommand("copy");
+            document.execCommand(
+              "copy"
+            );
 
-            document.getElementById("copyLink")
-              .textContent = "Copied!";
+            document
+              .getElementById("copyLink")
+              .textContent =
+              "Copied!";
 
           }
 
         };
 
 
-      button.textContent = "Created";
+      button.textContent =
+        "Created";
 
     };
 
 
-  function showBuilderError(message){
+  function showBuilderError(
+    message
+  ){
 
-    document.getElementById("builderMessage").innerHTML =
-      `<div class="error">${escapeHtml(message)}</div>`;
+    document
+      .getElementById(
+        "builderMessage"
+      )
+      .innerHTML =
+
+      `<div class="error">
+        ${escapeHtml(message)}
+      </div>`;
 
   }
 
@@ -1289,7 +1663,7 @@ function openForm(id){
 
 
 /* =========================
-   CSV
+   CSV DOWNLOAD
 ========================= */
 
 async function downloadCSV(id){
@@ -1302,14 +1676,17 @@ async function downloadCSV(id){
         encodeURIComponent(id) +
         "/export",
         {
-          credentials:"same-origin"
+          credentials:
+            "same-origin"
         }
       );
 
 
     if(!response.ok){
 
-      alert("Could not download CSV.");
+      alert(
+        "Could not download CSV."
+      );
 
       return;
 
@@ -1327,22 +1704,30 @@ async function downloadCSV(id){
     const a =
       document.createElement("a");
 
+
     a.href = url;
+
 
     a.download =
       "elective-responses.csv";
 
+
     document.body.appendChild(a);
+
 
     a.click();
 
+
     a.remove();
+
 
     URL.revokeObjectURL(url);
 
   }catch(error){
 
-    alert("Download failed.");
+    alert(
+      "Download failed."
+    );
 
   }
 
@@ -1361,7 +1746,9 @@ async function renderStudent(id){
 
     <div class="card center">
 
-      <h2>Loading form...</h2>
+      <div class="loading">
+        Loading form...
+      </div>
 
     </div>
 
@@ -1383,10 +1770,14 @@ async function renderStudent(id){
 
       <div class="card">
 
-        <h1>Form unavailable</h1>
+        <h1>
+          Form unavailable
+        </h1>
 
         <div class="error">
-          ${escapeHtml(result.error)}
+          ${escapeHtml(
+            result.error
+          )}
         </div>
 
       </div>
@@ -1398,7 +1789,8 @@ async function renderStudent(id){
   }
 
 
-  let form = result.form;
+  let form =
+    result.form;
 
 
   function renderForm(){
@@ -1408,26 +1800,48 @@ async function renderStudent(id){
       <div class="top-bar"></div>
 
 
-      <div class="card main-card">
+      <div class="student-header">
 
-        <h1>
-          ${escapeHtml(form.title)}
-        </h1>
+        <div class="college">
+          Elective Registration
+        </div>
 
-        ${
-          form.description
-          ?
-          `<p class="description">
-            ${escapeHtml(form.description)}
-          </p>`
-          :
-          ""
-        }
+        <div class="title">
+          Student Registration Form
+        </div>
 
       </div>
 
 
-      <div class="card">
+      <div class="card main-card">
+
+        <div class="form-info">
+
+          <h1>
+            ${escapeHtml(
+              form.title
+            )}
+          </h1>
+
+
+          ${
+            form.description
+
+            ?
+
+            `<p class="description">
+              ${escapeHtml(
+                form.description
+              )}
+            </p>`
+
+            :
+
+            ""
+          }
+
+        </div>
+
 
         <div class="field">
 
@@ -1439,7 +1853,7 @@ async function renderStudent(id){
           <input
             id="studentName"
             type="text"
-            placeholder="Enter your name"
+            placeholder="Enter your full name"
           >
 
         </div>
@@ -1455,7 +1869,23 @@ async function renderStudent(id){
           <input
             id="registerNo"
             type="text"
-            placeholder="Enter register number"
+            placeholder="Enter your register number"
+          >
+
+        </div>
+
+
+        <div class="field">
+
+          <label>
+            Department
+            <span class="required">*</span>
+          </label>
+
+          <input
+            id="studentDepartment"
+            type="text"
+            placeholder="Enter your department"
           >
 
         </div>
@@ -1488,64 +1918,81 @@ async function renderStudent(id){
           <div id="electiveOptions">
 
             ${
-              form.electives.map((el,index)=>{
+              form.electives
+                .map(
+                  (el,index) => {
 
-                let remaining =
-                  Number(el.remaining || 0);
+                    const remaining =
+                      Number(
+                        el.remaining || 0
+                      );
 
-                let capacity =
-                  Number(el.capacity || 1);
+                    const capacity =
+                      Number(
+                        el.capacity || 1
+                      );
 
-                let percent =
-                  remaining / capacity;
-
-
-                let className =
-                  remaining <= 0
-                  ? "full"
-                  : percent <= .2
-                  ? "almost"
-                  : "available";
-
-
-                let text =
-                  remaining <= 0
-                  ? "Full"
-                  : remaining + " left";
+                    const percent =
+                      remaining /
+                      capacity;
 
 
-                return `
-
-                  <div class="option">
-
-                    <input
-                      type="radio"
-                      name="elective"
-                      id="elective${index}"
-                      value="${escapeHtml(el.id)}"
-                      ${remaining <= 0 ? "disabled" : ""}
-                    >
+                    const className =
+                      remaining <= 0
+                        ? "full"
+                        : percent <= .2
+                        ? "almost"
+                        : "available";
 
 
-                    <label
-                      for="elective${index}"
-                    >
-                      ${escapeHtml(el.name)}
-                    </label>
+                    const text =
+                      remaining <= 0
+                        ? "Full"
+                        : remaining +
+                          " left";
 
 
-                    <span
-                      class="seats ${className}"
-                    >
-                      ${text}
-                    </span>
+                    return `
 
-                  </div>
+                      <div class="option">
 
-                `;
+                        <input
+                          type="radio"
+                          name="elective"
+                          id="elective${index}"
+                          value="${escapeHtml(
+                            el.id
+                          )}"
+                          ${
+                            remaining <= 0
+                              ? "disabled"
+                              : ""
+                          }
+                        >
 
-              }).join("")
 
+                        <label
+                          for="elective${index}"
+                        >
+                          ${escapeHtml(
+                            el.name
+                          )}
+                        </label>
+
+
+                        <span
+                          class="seats ${className}"
+                        >
+                          ${text}
+                        </span>
+
+                      </div>
+
+                    `;
+
+                  }
+                )
+                .join("")
             }
 
           </div>
@@ -1562,7 +2009,7 @@ async function renderStudent(id){
             class="primary"
             id="submitResponse"
           >
-            Submit
+            Submit Registration
           </button>
 
         </div>
@@ -1573,8 +2020,11 @@ async function renderStudent(id){
 
 
     document
-      .getElementById("submitResponse")
-      .onclick = submitResponse;
+      .getElementById(
+        "submitResponse"
+      )
+      .onclick =
+        submitResponse;
 
   }
 
@@ -1582,18 +2032,39 @@ async function renderStudent(id){
   async function submitResponse(){
 
     const name =
-      document.getElementById("studentName")
-      .value.trim();
+      document
+        .getElementById(
+          "studentName"
+        )
+        .value
+        .trim();
 
 
     const registerNo =
-      document.getElementById("registerNo")
-      .value.trim();
+      document
+        .getElementById(
+          "registerNo"
+        )
+        .value
+        .trim();
+
+
+    const department =
+      document
+        .getElementById(
+          "studentDepartment"
+        )
+        .value
+        .trim();
 
 
     const email =
-      document.getElementById("studentEmail")
-      .value.trim();
+      document
+        .getElementById(
+          "studentEmail"
+        )
+        .value
+        .trim();
 
 
     const selected =
@@ -1603,14 +2074,24 @@ async function renderStudent(id){
 
 
     const message =
-      document.getElementById("studentMessage");
+      document.getElementById(
+        "studentMessage"
+      );
 
 
-    if(!name || !registerNo || !email || !selected){
+    if(
+      !name ||
+      !registerNo ||
+      !department ||
+      !email ||
+      !selected
+    ){
 
       message.innerHTML =
+
         `<div class="error">
-          Please fill in all fields and choose an elective.
+          Please fill in all fields and
+          choose an elective.
         </div>`;
 
       return;
@@ -1619,11 +2100,15 @@ async function renderStudent(id){
 
 
     const button =
-      document.getElementById("submitResponse");
+      document.getElementById(
+        "submitResponse"
+      );
+
 
     button.disabled = true;
 
-    button.textContent = "Submitting...";
+    button.textContent =
+      "Submitting...";
 
 
     const result =
@@ -1638,9 +2123,15 @@ async function renderStudent(id){
           body:JSON.stringify({
 
             name,
+
             registerNo,
+
+            department,
+
             email,
-            electiveId:selected.value
+
+            electiveId:
+              selected.value
 
           })
 
@@ -1665,11 +2156,14 @@ async function renderStudent(id){
           </h1>
 
           <p class="description">
-            ${escapeHtml(result.message)}
+            ${escapeHtml(
+              result.message
+            )}
           </p>
 
           <p>
-            Your response has been recorded.
+            Your response has been recorded
+            successfully.
           </p>
 
         </div>
@@ -1679,13 +2173,19 @@ async function renderStudent(id){
     }else{
 
       message.innerHTML =
+
         `<div class="error">
-          ${escapeHtml(result.error)}
+          ${escapeHtml(
+            result.error
+          )}
         </div>`;
+
 
       button.disabled = false;
 
-      button.textContent = "Submit";
+      button.textContent =
+        "Submit Registration";
+
 
       await refreshSeats();
 
@@ -1705,7 +2205,8 @@ async function renderStudent(id){
 
     if(latest.ok){
 
-      form = latest.form;
+      form =
+        latest.form;
 
       renderForm();
 
@@ -1719,77 +2220,111 @@ async function renderStudent(id){
 
   /*
     Refresh seat counts every 5 seconds.
-    This doesn't submit anything automatically.
   */
 
-  setInterval(async()=>{
+  setInterval(
+    async () => {
 
-    const latest =
-      await api(
-        "/api/public/forms/" +
-        encodeURIComponent(id)
-      );
-
-
-    if(latest.ok){
-
-      form = latest.form;
-
-      /*
-        Only update the seat labels so that
-        students don't lose what they typed.
-      */
-
-      latest.form.electives.forEach(el=>{
-
-        const radio =
-          document.querySelector(
-            `input[name="elective"][value="${el.id}"]`
-          );
-
-        if(!radio) return;
-
-        const option =
-          radio.closest(".option");
-
-        const seat =
-          option.querySelector(".seats");
-
-        const remaining =
-          Number(el.remaining || 0);
-
-        const capacity =
-          Number(el.capacity || 1);
-
-        seat.textContent =
-          remaining <= 0
-          ? "Full"
-          : remaining + " left";
+      const latest =
+        await api(
+          "/api/public/forms/" +
+          encodeURIComponent(id)
+        );
 
 
-        seat.className =
-          "seats " +
-          (
+      if(!latest.ok)
+        return;
+
+
+      form =
+        latest.form;
+
+
+      latest.form.electives
+        .forEach(el => {
+
+          const radio =
+            document.querySelector(
+              `input[name="elective"][value="${el.id}"]`
+            );
+
+
+          if(!radio)
+            return;
+
+
+          const option =
+            radio.closest(
+              ".option"
+            );
+
+
+          if(!option)
+            return;
+
+
+          const seat =
+            option.querySelector(
+              ".seats"
+            );
+
+
+          if(!seat)
+            return;
+
+
+          const remaining =
+            Number(
+              el.remaining || 0
+            );
+
+
+          const capacity =
+            Number(
+              el.capacity || 1
+            );
+
+
+          seat.textContent =
             remaining <= 0
-            ? "full"
-            : remaining / capacity <= .2
-            ? "almost"
-            : "available"
-          );
+              ? "Full"
+              : remaining + " left";
 
 
-        radio.disabled =
-          remaining <= 0;
+          seat.className =
+            "seats " +
 
-      });
+            (
+              remaining <= 0
 
-    }
+                ? "full"
 
-  },5000);
+                : remaining / capacity <= .2
+
+                ? "almost"
+
+                : "available"
+            );
+
+
+          radio.disabled =
+            remaining <= 0;
+
+        });
+
+    },
+    5000
+  );
 
 }
+
+
+/* =========================
+   END
+========================= */
 
 </script>
 
 </body>
+
 </html>
