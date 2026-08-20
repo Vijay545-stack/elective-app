@@ -10,7 +10,6 @@ Open http://localhost:3000
 
 ## Deploy
 
-Push this repo to Render.com or Railway.app as a Node web service.
-Build command: npm install
-Start command: npm start
-Add environment variable SESSION_SECRET set to any random string.
+npm install
+npm start
+
