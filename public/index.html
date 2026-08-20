@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Create elective registration forms with live seat limits and shareable links.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23673ab7'/%3E%3Ctext x='50' y='68' font-size='55' text-anchor='middle' fill='white' font-family='sans-serif'%3EE%3C/text%3E%3C/svg%3E">
 <title>Elective Registration</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono&display=swap" rel="stylesheet">
@@ -96,6 +98,15 @@
   .field-row-pair{display:flex; gap:20px;}
   .field-row-pair > div{flex:1;}
   @media (max-width:600px){ .field-row-pair{flex-direction:column; gap:0;} }
+  .responses-panel{
+    background:#faf9fc; border:1px solid var(--line); border-top:none;
+    padding:14px; margin:-20px 0 24px;
+  }
+  .pw-toggle{
+    position:absolute; right:2px; top:50%; transform:translateY(-50%);
+    background:none; border:none; color:var(--purple); font-size:12px;
+    font-family:'Google Sans','Roboto',sans-serif; cursor:pointer; padding:6px 4px;
+  }
 </style>
 </head>
 <body>
@@ -136,10 +147,31 @@ async function boot(){
 }
 
 /* ============================================================
-   AUTH: LOGIN / SIGNUP
+   AUTH: LOGIN / SIGNUP / FORGOT PASSWORD
 ============================================================ */
+function passwordFieldHtml(id, label='Password'){
+  return `
+    <p class="q-label">${label}<span class="required">*</span></p>
+    <div style="position:relative; max-width:400px;">
+      <input class="field-input" id="${id}" type="password" style="padding-right:52px;">
+      <button type="button" class="pw-toggle" data-target="${id}">Show</button>
+    </div>
+  `;
+}
+function wirePasswordToggles(){
+  document.querySelectorAll('.pw-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const input = document.getElementById(btn.dataset.target);
+      const showing = input.type === 'text';
+      input.type = showing ? 'password' : 'text';
+      btn.textContent = showing ? 'Show' : 'Hide';
+    });
+  });
+}
+
 function renderAuth(mode='login'){
   const isLogin = mode === 'login';
+
   app.innerHTML = `
     <div class="top-bar"></div>
     <div class="card">
@@ -152,21 +184,36 @@ function renderAuth(mode='login'){
         <p class="q-label">Email<span class="required">*</span></p>
         <input class="field-input narrow" id="authEmail" type="email">
       </div>
-      <div style="margin-bottom:8px;">
-        <p class="q-label">Password<span class="required">*</span></p>
-        <input class="field-input narrow" id="authPassword" type="password">
+      <div style="margin-bottom:${isLogin ? '8px' : '18px'};">
+        ${passwordFieldHtml('authPassword')}
       </div>
+      ${!isLogin ? `
+        <div style="margin-bottom:18px;">
+          <p class="q-label">Security question<span class="required">*</span></p>
+          <input class="field-input narrow" id="authSecQ" type="text" placeholder="e.g. What was your first school?">
+        </div>
+        <div style="margin-bottom:8px;">
+          <p class="q-label">Answer<span class="required">*</span></p>
+          <input class="field-input narrow" id="authSecA" type="text" placeholder="Used only if you forget your password">
+        </div>
+      ` : ''}
       <div class="banner" id="authBanner"></div>
-      <div class="actions-row" style="justify-content:space-between;">
+      <div class="actions-row" style="justify-content:space-between; flex-wrap:wrap; gap:10px;">
         <span class="auth-toggle" style="margin:0;">
-          ${isLogin ? `New here? <a id="toggleAuth">Create an account</a>` : `Already have an account? <a id="toggleAuth">Log in</a>`}
+          ${isLogin
+            ? `New here? <a id="toggleAuth">Create an account</a> &nbsp;&middot;&nbsp; <a id="forgotLink">Forgot password?</a>`
+            : `Already have an account? <a id="toggleAuth">Log in</a>`}
         </span>
         <button class="btn btn-primary" id="authSubmit">${isLogin ? 'Log in' : 'Sign up'}</button>
       </div>
     </div>
   `;
 
+  wirePasswordToggles();
   document.getElementById('toggleAuth').addEventListener('click', () => renderAuth(isLogin ? 'signup' : 'login'));
+  if (isLogin) {
+    document.getElementById('forgotLink').addEventListener('click', () => renderForgotPassword());
+  }
 
   document.getElementById('authSubmit').addEventListener('click', async () => {
     const banner = document.getElementById('authBanner');
@@ -174,18 +221,116 @@ function renderAuth(mode='login'){
     const email = document.getElementById('authEmail').value.trim();
     const password = document.getElementById('authPassword').value;
     const name = isLogin ? '' : document.getElementById('authName').value.trim();
+    const securityQuestion = isLogin ? '' : document.getElementById('authSecQ').value.trim();
+    const securityAnswer = isLogin ? '' : document.getElementById('authSecA').value.trim();
+
+    if (!isLogin && (!securityQuestion || !securityAnswer)) {
+      banner.textContent = 'Add a security question and answer — you\'ll need it if you ever forget your password.';
+      banner.className = 'banner err show';
+      return;
+    }
 
     const btn = document.getElementById('authSubmit');
     btn.disabled = true;
 
     const result = await api(isLogin ? '/api/login' : '/api/signup', {
       method: 'POST',
-      body: JSON.stringify({ email, password, name })
+      body: JSON.stringify({ email, password, name, securityQuestion, securityAnswer })
     });
 
     if (result.ok) {
       const me = await api('/api/me');
       renderDashboard(me.teacher);
+    } else {
+      banner.textContent = result.error;
+      banner.className = 'banner err show';
+      btn.disabled = false;
+    }
+  });
+}
+
+/* ---- Forgot password: email -> security question -> new password ---- */
+function renderForgotPassword(){
+  app.innerHTML = `
+    <div class="top-bar"></div>
+    <div class="card">
+      <h1 class="static-title">Reset your password</h1>
+      <p class="static-desc">Enter your account email to see your security question.</p>
+    </div>
+    <div class="card question">
+      <p class="q-label">Email<span class="required">*</span></p>
+      <input class="field-input narrow" id="fpEmail" type="email">
+      <div class="banner" id="fpBanner1"></div>
+      <div class="actions-row" style="justify-content:space-between;">
+        <a class="link-plain" id="backToLogin1">&larr; Back to login</a>
+        <button class="btn btn-primary" id="fpNextBtn">Next</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('backToLogin1').addEventListener('click', () => renderAuth('login'));
+
+  document.getElementById('fpNextBtn').addEventListener('click', async () => {
+    const banner = document.getElementById('fpBanner1');
+    banner.className = 'banner';
+    const email = document.getElementById('fpEmail').value.trim();
+    const btn = document.getElementById('fpNextBtn');
+    btn.disabled = true;
+
+    const result = await api('/api/forgot-password/question', {
+      method: 'POST',
+      body: JSON.stringify({ email })
+    });
+
+    if (!result.ok) {
+      banner.textContent = result.error;
+      banner.className = 'banner err show';
+      btn.disabled = false;
+      return;
+    }
+    renderForgotPasswordReset(email, result.question);
+  });
+}
+
+function renderForgotPasswordReset(email, question){
+  app.innerHTML = `
+    <div class="top-bar"></div>
+    <div class="card">
+      <h1 class="static-title">Answer &amp; set a new password</h1>
+      <p class="static-desc">${escapeHtml(question)}</p>
+    </div>
+    <div class="card question">
+      <div style="margin-bottom:18px;">
+        <p class="q-label">Your answer<span class="required">*</span></p>
+        <input class="field-input narrow" id="fpAnswer" type="text">
+      </div>
+      <div style="margin-bottom:8px;">
+        ${passwordFieldHtml('fpNewPassword', 'New password')}
+      </div>
+      <div class="banner" id="fpBanner2"></div>
+      <div class="actions-row" style="justify-content:space-between;">
+        <a class="link-plain" id="backToLogin2">&larr; Back to login</a>
+        <button class="btn btn-primary" id="fpResetBtn">Reset password</button>
+      </div>
+    </div>
+  `;
+  wirePasswordToggles();
+  document.getElementById('backToLogin2').addEventListener('click', () => renderAuth('login'));
+
+  document.getElementById('fpResetBtn').addEventListener('click', async () => {
+    const banner = document.getElementById('fpBanner2');
+    banner.className = 'banner';
+    const answer = document.getElementById('fpAnswer').value.trim();
+    const newPassword = document.getElementById('fpNewPassword').value;
+    const btn = document.getElementById('fpResetBtn');
+    btn.disabled = true;
+
+    const result = await api('/api/forgot-password/reset', {
+      method: 'POST',
+      body: JSON.stringify({ email, answer, newPassword })
+    });
+
+    if (result.ok) {
+      renderAuth('login');
     } else {
       banner.textContent = result.error;
       banner.className = 'banner err show';
@@ -229,9 +374,9 @@ async function renderDashboard(teacher){
   wrap.innerHTML = res.forms.map(f => {
     const link = window.location.origin + '/?form=' + f.id;
     return `
-      <div class="form-list-item">
+      <div class="form-list-item" data-form-id="${f.id}">
         <div>
-          <div class="form-list-title">${escapeHtml(f.title)}</div>
+          <div class="form-list-title">${escapeHtml(f.title)} ${f.closed ? '<span class="seat-tag seat-full" style="margin-left:6px;">Closed</span>' : ''}</div>
           <div class="form-list-meta">
             ${[f.department, f.collegeName].filter(Boolean).join(' · ')}
             ${f.department || f.collegeName ? ' &middot; ' : ''}${f.totalTaken}/${f.totalCapacity} seats filled
@@ -239,11 +384,84 @@ async function renderDashboard(teacher){
         </div>
         <div class="row-actions">
           <a class="link-plain" href="${link}" target="_blank">Open link</a>
-          <a class="link-plain" href="/api/forms/${f.id}/export">Download CSV</a>
+          <a class="link-plain view-responses-link" href="#">Responses</a>
+          <a class="link-plain" href="/api/forms/${f.id}/export">CSV</a>
+          <a class="link-plain toggle-close-link" href="#">${f.closed ? 'Reopen' : 'Close'}</a>
+          <a class="link-plain delete-form-link" href="#" style="color:var(--red);">Delete</a>
         </div>
       </div>
+      <div class="responses-panel" id="responses-${f.id}" style="display:none;"></div>
     `;
   }).join('');
+
+  wrap.querySelectorAll('.view-responses-link').forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const item = e.target.closest('.form-list-item');
+      const formId = item.dataset.formId;
+      const panel = document.getElementById('responses-' + formId);
+      if (panel.style.display === 'block') { panel.style.display = 'none'; return; }
+
+      panel.innerHTML = '<p class="empty-state">Loading responses…</p>';
+      panel.style.display = 'block';
+      const result = await api(`/api/forms/${formId}/responses`);
+      if (!result.ok || !result.responses.length) {
+        panel.innerHTML = '<p class="empty-state">No responses yet.</p>';
+        return;
+      }
+      panel.innerHTML = `
+        <div style="overflow-x:auto;">
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="text-align:left; border-bottom:1px solid var(--line);">
+                <th style="padding:8px 6px;">Name</th>
+                <th style="padding:8px 6px;">Register No.</th>
+                <th style="padding:8px 6px;">Department</th>
+                <th style="padding:8px 6px;">Elective</th>
+                <th style="padding:8px 6px;">Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${result.responses.map(r => `
+                <tr style="border-bottom:1px solid #f1f1f1;">
+                  <td style="padding:8px 6px;">${escapeHtml(r.name)}</td>
+                  <td style="padding:8px 6px;">${escapeHtml(r.registerNo)}</td>
+                  <td style="padding:8px 6px;">${escapeHtml(r.department)}</td>
+                  <td style="padding:8px 6px;">${escapeHtml(r.elective)}</td>
+                  <td style="padding:8px 6px;">${escapeHtml(r.email)}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+  });
+
+  wrap.querySelectorAll('.toggle-close-link').forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const item = e.target.closest('.form-list-item');
+      const formId = item.dataset.formId;
+      const isCurrentlyClosed = e.target.textContent.trim() === 'Reopen';
+      await api(`/api/forms/${formId}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ closed: !isCurrentlyClosed })
+      });
+      renderDashboard(teacher);
+    });
+  });
+
+  wrap.querySelectorAll('.delete-form-link').forEach(link => {
+    link.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const item = e.target.closest('.form-list-item');
+      const formId = item.dataset.formId;
+      if (!confirm('Delete this form and all its responses? This cannot be undone.')) return;
+      await api(`/api/forms/${formId}`, { method: 'DELETE' });
+      renderDashboard(teacher);
+    });
+  });
 }
 
 /* ============================================================
@@ -393,18 +611,32 @@ async function renderStudentView(formId){
     .map(w => w[0].toUpperCase())
     .join('') || 'E';
 
+  const instHeader = form.collegeName ? `
+    <div class="inst-header">
+      <div class="inst-crest">${escapeHtml(initials)}</div>
+      <div class="inst-text">
+        <div class="inst-college">${escapeHtml(form.collegeName)}</div>
+        ${form.department ? `<div class="inst-dept">${escapeHtml(form.department)}</div>` : ''}
+      </div>
+    </div>
+  ` : '';
+
+  if (form.closed) {
+    app.innerHTML = `
+      <div class="top-bar"></div>
+      <div class="card confirm">
+        ${instHeader}
+        <h1 class="static-title">This form is closed</h1>
+        <p class="static-desc">"${escapeHtml(form.title)}" is no longer accepting responses. Please contact your department for next steps.</p>
+      </div>
+    `;
+    return;
+  }
+
   app.innerHTML = `
     <div class="top-bar"></div>
     <div class="card">
-      ${form.collegeName ? `
-        <div class="inst-header">
-          <div class="inst-crest">${escapeHtml(initials)}</div>
-          <div class="inst-text">
-            <div class="inst-college">${escapeHtml(form.collegeName)}</div>
-            ${form.department ? `<div class="inst-dept">${escapeHtml(form.department)}</div>` : ''}
-          </div>
-        </div>
-      ` : ''}
+      ${instHeader}
       <h1 class="static-title">${escapeHtml(form.title)}</h1>
       ${form.description ? `<p class="static-desc">${escapeHtml(form.description)}</p>` : ''}
     </div>
@@ -415,6 +647,10 @@ async function renderStudentView(formId){
     <div class="card question">
       <p class="q-label">Register number<span class="required">*</span></p>
       <input class="field-input" id="sRegNo" type="text" required>
+    </div>
+    <div class="card question">
+      <p class="q-label">Your department<span class="required">*</span></p>
+      <input class="field-input" id="sDept" type="text" placeholder="e.g. Computer Science" required>
     </div>
     <div class="card question">
       <p class="q-label">Elective<span class="required">*</span></p>
@@ -446,10 +682,11 @@ async function renderStudentView(formId){
     const banner = document.getElementById('studentBanner');
     const name = document.getElementById('sName').value.trim();
     const registerNo = document.getElementById('sRegNo').value.trim();
+    const department = document.getElementById('sDept').value.trim();
     const email = document.getElementById('sEmail').value.trim();
     const chosen = document.querySelector('input[name=elective]:checked');
 
-    if (!name || !registerNo || !email || !chosen){
+    if (!name || !registerNo || !department || !email || !chosen){
       banner.textContent = 'Please fill in every field and choose an elective.';
       banner.className = 'banner err show';
       return;
@@ -461,7 +698,7 @@ async function renderStudentView(formId){
 
     const result = await api(`/api/public/forms/${formId}/responses`, {
       method: 'POST',
-      body: JSON.stringify({ name, registerNo, email, electiveId: chosen.value })
+      body: JSON.stringify({ name, registerNo, department, email, electiveId: chosen.value })
     });
 
     if (result.ok) {
