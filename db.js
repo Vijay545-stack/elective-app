@@ -1,46 +1,26 @@
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data.json');
+const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/elective_db';
 
-function emptyData() {
-  return { teachers: [], forms: [], responses: [] };
-}
-
-function load() {
-  try {
-    const raw = fs.readFileSync(DB_PATH, 'utf8');
-    const data = JSON.parse(raw);
-    if (!data.teachers) data.teachers = [];
-    if (!data.forms) data.forms = [];
-    if (!data.responses) data.responses = [];
-    return data;
-  } catch (err) {
-    if (err.code === 'ENOENT') {
-      const fresh = emptyData();
-      save(fresh);
-      return fresh;
+const connectDB = async () => {
+    try {
+        await mongoose.connect(MONGO_URI);
+        console.log('MongoDB connected successfully');
+    } catch (err) {
+        console.error('MongoDB connection error:', err.message);
     }
-    throw err;
-  }
-}
+};
 
-function save(data) {
-  fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
-}
+const ResponseSchema = new mongoose.Schema({
+    name: { type: String, required: true, trim: true },
+    rollNo: { type: String, required: true, unique: true, trim: true },
+    email: { type: String, required: true, trim: true },
+    department: { type: String, required: true, trim: true },
+    elective: { type: String, required: true },
+    elective2: { type: String, default: 'None' },
+    createdAt: { type: Date, default: Date.now }
+});
 
-// Simple in-process mutex so concurrent requests never read-modify-write
-// the JSON file at the same time and clobber each other's changes.
-let queue = Promise.resolve();
+const Response = mongoose.model('Response', ResponseSchema);
 
-function withLock(fn) {
-  const run = queue.then(async () => {
-    const data = load();
-    return fn(data);
-  });
-  // Keep the queue moving even if fn() throws, so later callers aren't stuck.
-  queue = run.then(() => {}, () => {});
-  return run;
-}
-
-module.exports = { load, save, withLock };
+module.exports = { connectDB, Response };
