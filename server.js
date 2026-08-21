@@ -30,36 +30,6 @@ function requireAuth(req, res, next) {
   next();
 }
 
-function requireAdmin(req, res, next) {
-  if (!req.session.isAdmin) {
-    return res.status(401).json({ ok: false, error: 'Admin login required.' });
-  }
-  next();
-}
-
-// Which standard student-identity fields a form collects. Defaults to all
-// four (matches original behavior); a teacher can turn any of them off.
-function buildStudentFields(input) {
-  const src = (input && typeof input === 'object') ? input : {};
-  return {
-    name: src.name !== false,
-    registerNo: src.registerNo !== false,
-    department: src.department !== false,
-    email: src.email !== false
-  };
-}
-function getStudentFields(form) {
-  return form.studentFields || { name: true, registerNo: true, department: true, email: true };
-}
-function studentFieldColumns(fields) {
-  const cols = [];
-  if (fields.name) cols.push({ key: 'name', label: 'Student Name' });
-  if (fields.registerNo) cols.push({ key: 'registerNo', label: 'Register Number' });
-  if (fields.department) cols.push({ key: 'department', label: 'Department' });
-  if (fields.email) cols.push({ key: 'email', label: 'Email' });
-  return cols;
-}
-
 /* ---------------------- FORM / QUESTION HELPERS ---------------------- */
 
 // Normalizes+validates the teacher-submitted question list into a clean,
@@ -69,13 +39,13 @@ function buildQuestions(questionsInput, isQuiz) {
     const type = QUESTION_TYPES.includes(q.type) ? q.type : 'short_answer';
     const label = String(q.label || '').trim();
     const required = q.required !== false; // default true
-    const question = { id: uuidv4(), type, label, required };
+    const question = { id: String(q.id || uuidv4()), type, label, required };
 
     if (CHOICE_TYPES.includes(type)) {
       const rawOptions = Array.isArray(q.options) ? q.options : [];
       question.options = rawOptions
         .map(o => {
-          const opt = { id: uuidv4(), text: String(o.text || '').trim() };
+          const opt = { id: String(o.id || uuidv4()), text: String(o.text || '').trim() };
           if (type === 'elective') {
             opt.capacity = Math.max(parseInt(o.capacity, 10) || 0, 0);
           }
@@ -223,24 +193,7 @@ app.get('/api/me', (req, res) => {
   if (!req.session.teacherId) return res.json({ ok: true, teacher: null });
   const data = require('./db').load();
   const teacher = data.teachers.find(t => t.id === req.session.teacherId);
-  res.json({ ok: true, teacher: teacher ? { id: teacher.id, email: teacher.email, name: teacher.name, wallpaperUrl: teacher.wallpaperUrl || '' } : null });
-});
-
-// Lets a teacher set (or clear, by sending an empty string) a background
-// image URL for their own dashboard. Purely cosmetic, stored per-teacher.
-app.patch('/api/me/wallpaper', requireAuth, async (req, res) => {
-  const wallpaperUrl = String(req.body.wallpaperUrl || '').trim();
-  try {
-    await withLock(async (data) => {
-      const teacher = data.teachers.find(t => t.id === req.session.teacherId);
-      if (!teacher) throw new Error('Account not found.');
-      teacher.wallpaperUrl = wallpaperUrl;
-      require('./db').save(data);
-    });
-    res.json({ ok: true, wallpaperUrl });
-  } catch (err) {
-    res.status(400).json({ ok: false, error: err.message });
-  }
+  res.json({ ok: true, teacher: teacher ? { id: teacher.id, email: teacher.email, name: teacher.name } : null });
 });
 
 /* ---- Forgot password: look up security question, then verify + reset ---- */
@@ -289,7 +242,13 @@ app.post('/api/forms', requireAuth, async (req, res) => {
   const collegeName = String(req.body.collegeName || '').trim();
   const department = String(req.body.department || '').trim();
   const isQuiz = !!req.body.isQuiz;
-  const studentFields = buildStudentFields(req.body.studentFields);
+  const rawStudentFields = req.body.studentFields || {};
+  const studentFields = {
+    name: rawStudentFields.name !== false,
+    registerNo: rawStudentFields.registerNo !== false,
+    department: rawStudentFields.department !== false,
+    email: rawStudentFields.email !== false
+  };
 
   const questions = buildQuestions(req.body.questions, isQuiz);
   if (!questions.length) {
@@ -330,6 +289,7 @@ app.get('/api/forms', requireAuth, (req, res) => {
       collegeName: f.collegeName || '',
       department: f.department || '',
       isQuiz: !!f.isQuiz,
+      studentFields: f.studentFields || { name:true, registerNo:true, department:true, email:true },
       questionCount: f.questions.length,
       closed: !!f.closed,
       createdAt: f.createdAt,
@@ -352,9 +312,34 @@ app.get('/api/forms/:id/export', requireAuth, (req, res) => {
   if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
 
   const rows = data.responses.filter(r => r.formId === form.id);
+  const optionTextById = {};
+  form.questions.forEach(q => (q.options || []).forEach(o => { optionTextById[o.id] = o.text; }));
+
+  const fields = form.studentFields || { name:true, registerNo:true, department:true, email:true };
+  const header = ['Timestamp']
+    .concat(fields.name ? ['Student Name'] : [])
+    .concat(fields.registerNo ? ['Register Number'] : [])
+    .concat(fields.department ? ['Department'] : [])
+    .concat(fields.email ? ['Email'] : [])
+    .concat(form.questions.map(q => q.label))
+    .concat(form.isQuiz ? ['Score'] : []);
+  const csvLines = [header.map(csvEscape).join(',')];
+
+  rows.forEach(r => {
+    const answerByQ = Object.fromEntries((r.answers || []).map(a => [a.questionId, a.value]));
+    const row = [r.createdAt]
+      .concat(fields.name ? [r.name] : [])
+      .concat(fields.registerNo ? [r.registerNo] : [])
+      .concat(fields.department ? [r.department || ''] : [])
+      .concat(fields.email ? [r.email] : [])
+      .concat(form.questions.map(q => formatAnswer(answerByQ[q.id], optionTextById)))
+      .concat(form.isQuiz ? [`${r.score ?? ''}/${r.maxScore ?? ''}`] : []);
+    csvLines.push(row.map(csvEscape).join(','));
+  });
+
   res.setHeader('Content-Type', 'text/csv');
   res.setHeader('Content-Disposition', `attachment; filename="${form.title.replace(/[^a-z0-9]/gi, '_')}_responses.csv"`);
-  res.send(buildCsv(form, rows));
+  res.send(csvLines.join('\n'));
 });
 
 function csvEscape(v) {
@@ -366,44 +351,22 @@ function formatAnswer(value, optionTextById) {
   return optionTextById[value] || value;
 }
 
-// Shared by the teacher and admin CSV-export routes.
-function buildCsv(form, rows) {
+app.get('/api/forms/:id/responses', requireAuth, (req, res) => {
+  const data = require('./db').load();
+  const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
+  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
+
   const optionTextById = {};
   form.questions.forEach(q => (q.options || []).forEach(o => { optionTextById[o.id] = o.text; }));
-  const fields = getStudentFields(form);
-  const cols = studentFieldColumns(fields);
 
-  const header = ['Timestamp']
-    .concat(cols.map(c => c.label))
-    .concat(form.questions.map(q => q.label))
-    .concat(form.isQuiz ? ['Score'] : []);
-  const csvLines = [header.map(csvEscape).join(',')];
-
-  rows.forEach(r => {
-    const answerByQ = Object.fromEntries((r.answers || []).map(a => [a.questionId, a.value]));
-    const row = [r.createdAt]
-      .concat(cols.map(c => r[c.key] || ''))
-      .concat(form.questions.map(q => formatAnswer(answerByQ[q.id], optionTextById)))
-      .concat(form.isQuiz ? [`${r.score ?? ''}/${r.maxScore ?? ''}`] : []);
-    csvLines.push(row.map(csvEscape).join(','));
-  });
-
-  return csvLines.join('\n');
-}
-
-// Shared by the teacher and admin responses-listing routes.
-function buildResponsesPayload(form, rows) {
-  const optionTextById = {};
-  form.questions.forEach(q => (q.options || []).forEach(o => { optionTextById[o.id] = o.text; }));
-  const fields = getStudentFields(form);
-
-  return rows
+  const rows = data.responses
+    .filter(r => r.formId === form.id)
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map(r => ({
-      name: fields.name ? r.name : undefined,
-      registerNo: fields.registerNo ? r.registerNo : undefined,
-      department: fields.department ? (r.department || '') : undefined,
-      email: fields.email ? r.email : undefined,
+      name: r.name,
+      registerNo: r.registerNo,
+      department: r.department || '',
+      email: r.email,
       createdAt: r.createdAt,
       score: r.score,
       maxScore: r.maxScore,
@@ -416,19 +379,8 @@ function buildResponsesPayload(form, rows) {
         };
       })
     }));
-}
 
-app.get('/api/forms/:id/responses', requireAuth, (req, res) => {
-  const data = require('./db').load();
-  const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
-  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
-
-  const rows = data.responses.filter(r => r.formId === form.id);
-  res.json({
-    ok: true,
-    form: { title: form.title, isQuiz: !!form.isQuiz, questions: form.questions, studentFields: getStudentFields(form) },
-    responses: buildResponsesPayload(form, rows)
-  });
+  res.json({ ok: true, form: { title: form.title, isQuiz: !!form.isQuiz, studentFields: form.studentFields || { name:true, registerNo:true, department:true, email:true }, questions: form.questions }, responses: rows });
 });
 
 app.patch('/api/forms/:id', requireAuth, async (req, res) => {
@@ -437,23 +389,31 @@ app.patch('/api/forms/:id', requireAuth, async (req, res) => {
       const form = data.forms.find(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
       if (!form) throw new Error('Form not found.');
 
-      // Simple toggle used from the dashboard (Close/Reopen).
-      if (typeof req.body.closed === 'boolean') form.closed = req.body.closed;
-
-      // Full edit, used from "Edit form" — every field is optional so this
-      // route still works for the simple {closed} toggle above.
-      if (req.body.title !== undefined) form.title = String(req.body.title || '').trim() || 'Untitled form';
-      if (req.body.description !== undefined) form.description = String(req.body.description || '').trim();
-      if (req.body.collegeName !== undefined) form.collegeName = String(req.body.collegeName || '').trim();
-      if (req.body.department !== undefined) form.department = String(req.body.department || '').trim();
-      if (req.body.isQuiz !== undefined) form.isQuiz = !!req.body.isQuiz;
-      if (req.body.studentFields !== undefined) form.studentFields = buildStudentFields(req.body.studentFields);
-      if (req.body.questions !== undefined) {
-        const questions = buildQuestions(req.body.questions, form.isQuiz);
+      if (typeof req.body.closed === 'boolean' && Object.keys(req.body).length === 1) {
+        form.closed = req.body.closed;
+      } else {
+        const title = String(req.body.title || '').trim() || 'Untitled form';
+        const description = String(req.body.description || '').trim();
+        const collegeName = String(req.body.collegeName || '').trim();
+        const department = String(req.body.department || '').trim();
+        const isQuiz = !!req.body.isQuiz;
+        const rawStudentFields = req.body.studentFields || {};
+        const studentFields = {
+          name: rawStudentFields.name !== false,
+          registerNo: rawStudentFields.registerNo !== false,
+          department: rawStudentFields.department !== false,
+          email: rawStudentFields.email !== false
+        };
+        const questions = buildQuestions(req.body.questions, isQuiz);
         if (!questions.length) throw new Error('Add at least one question.');
+        form.title = title;
+        form.description = description;
+        form.collegeName = collegeName;
+        form.department = department;
+        form.isQuiz = isQuiz;
+        form.studentFields = studentFields;
         form.questions = questions;
       }
-
       require('./db').save(data);
       return form;
     });
@@ -467,117 +427,6 @@ app.delete('/api/forms/:id', requireAuth, async (req, res) => {
   try {
     await withLock(async (data) => {
       const idx = data.forms.findIndex(f => f.id === req.params.id && f.teacherId === req.session.teacherId);
-      if (idx === -1) throw new Error('Form not found.');
-      data.forms.splice(idx, 1);
-      data.responses = data.responses.filter(r => r.formId !== req.params.id);
-      require('./db').save(data);
-    });
-    res.json({ ok: true });
-  } catch (err) {
-    res.status(404).json({ ok: false, error: err.message });
-  }
-});
-
-/* ---------------------- ADMIN: SEE EVERY TEACHER'S FORMS ---------------------- */
-// Admin credentials come from environment variables (set these in Render's
-// dashboard under Environment): ADMIN_EMAIL and ADMIN_PASSWORD.
-// If they're not set, admin login is disabled (always rejected) — safe default.
-
-app.post('/api/admin/login', (req, res) => {
-  const email = String(req.body.email || '').trim().toLowerCase();
-  const password = String(req.body.password || '');
-  const adminEmail = String(process.env.ADMIN_EMAIL || '').trim().toLowerCase();
-  const adminPassword = String(process.env.ADMIN_PASSWORD || '');
-
-  if (!adminEmail || !adminPassword) {
-    return res.status(400).json({ ok: false, error: 'Admin login is not configured on this server yet.' });
-  }
-  if (email !== adminEmail || password !== adminPassword) {
-    return res.status(400).json({ ok: false, error: 'Incorrect admin email or password.' });
-  }
-  req.session.isAdmin = true;
-  req.session.adminEmail = adminEmail;
-  res.json({ ok: true });
-});
-
-app.post('/api/admin/logout', (req, res) => {
-  req.session.isAdmin = false;
-  req.session.adminEmail = null;
-  res.json({ ok: true });
-});
-
-app.get('/api/admin/me', (req, res) => {
-  res.json({ ok: true, admin: !!req.session.isAdmin ? { email: req.session.adminEmail } : null });
-});
-
-// Every form from every teacher — same shape as GET /api/forms, plus who made it.
-app.get('/api/admin/forms', requireAdmin, (req, res) => {
-  const data = require('./db').load();
-  const teacherById = Object.fromEntries(data.teachers.map(t => [t.id, t]));
-  const withCounts = data.forms.map(f => {
-    const responseCount = data.responses.filter(r => r.formId === f.id).length;
-    const teacher = teacherById[f.teacherId];
-    return {
-      id: f.id,
-      title: f.title,
-      description: f.description,
-      collegeName: f.collegeName || '',
-      department: f.department || '',
-      isQuiz: !!f.isQuiz,
-      questionCount: f.questions.length,
-      closed: !!f.closed,
-      createdAt: f.createdAt,
-      responseCount,
-      teacherName: teacher ? teacher.name : '(deleted teacher)',
-      teacherEmail: teacher ? teacher.email : ''
-    };
-  }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  res.json({ ok: true, forms: withCounts });
-});
-
-app.get('/api/admin/forms/:id/responses', requireAdmin, (req, res) => {
-  const data = require('./db').load();
-  const form = data.forms.find(f => f.id === req.params.id);
-  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
-
-  const rows = data.responses.filter(r => r.formId === form.id);
-  res.json({
-    ok: true,
-    form: { title: form.title, isQuiz: !!form.isQuiz, questions: form.questions, studentFields: getStudentFields(form) },
-    responses: buildResponsesPayload(form, rows)
-  });
-});
-
-app.get('/api/admin/forms/:id/export', requireAdmin, (req, res) => {
-  const data = require('./db').load();
-  const form = data.forms.find(f => f.id === req.params.id);
-  if (!form) return res.status(404).json({ ok: false, error: 'Form not found.' });
-
-  const rows = data.responses.filter(r => r.formId === form.id);
-  res.setHeader('Content-Type', 'text/csv');
-  res.setHeader('Content-Disposition', `attachment; filename="${form.title.replace(/[^a-z0-9]/gi, '_')}_responses.csv"`);
-  res.send(buildCsv(form, rows));
-});
-
-app.patch('/api/admin/forms/:id', requireAdmin, async (req, res) => {
-  try {
-    const updated = await withLock(async (data) => {
-      const form = data.forms.find(f => f.id === req.params.id);
-      if (!form) throw new Error('Form not found.');
-      if (typeof req.body.closed === 'boolean') form.closed = req.body.closed;
-      require('./db').save(data);
-      return form;
-    });
-    res.json({ ok: true, closed: !!updated.closed });
-  } catch (err) {
-    res.status(404).json({ ok: false, error: err.message });
-  }
-});
-
-app.delete('/api/admin/forms/:id', requireAdmin, async (req, res) => {
-  try {
-    await withLock(async (data) => {
-      const idx = data.forms.findIndex(f => f.id === req.params.id);
       if (idx === -1) throw new Error('Form not found.');
       data.forms.splice(idx, 1);
       data.responses = data.responses.filter(r => r.formId !== req.params.id);
@@ -607,7 +456,7 @@ app.get('/api/public/forms/:id', (req, res) => {
       department: form.department || '',
       isQuiz: !!form.isQuiz,
       closed: !!form.closed,
-      studentFields: getStudentFields(form),
+      studentFields: form.studentFields || { name:true, registerNo:true, department:true, email:true },
       // Never leak correct answers to the public form.
       questions: withStatus.questions.map(q => {
         const { correctOptionIds, ...rest } = q;
@@ -619,12 +468,23 @@ app.get('/api/public/forms/:id', (req, res) => {
 
 app.post('/api/public/forms/:id/responses', async (req, res) => {
   const formId = req.params.id;
+  const data0 = require('./db').load();
+  const form0 = data0.forms.find(f => f.id === formId);
+  if (!form0) return res.status(404).json({ ok: false, error: 'This form does not exist or was removed.' });
+  const fields = form0.studentFields || { name:true, registerNo:true, department:true, email:true };
   const name = String(req.body.name || '').trim();
   const registerNo = String(req.body.registerNo || '').trim();
   const department = String(req.body.department || '').trim();
   const email = String(req.body.email || '').trim();
   const answersInput = Array.isArray(req.body.answers) ? req.body.answers : [];
+
+  if ((fields.name && !name) || (fields.registerNo && !registerNo) || (fields.department && !department) || (fields.email && !email)) {
+    return res.status(400).json({ ok: false, error: 'Please fill in every enabled student information field.' });
+  }
   const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (fields.email && !emailPattern.test(email)) {
+    return res.status(400).json({ ok: false, error: 'That email address looks invalid.' });
+  }
 
   try {
     const result = await withLock(async (data) => {
@@ -632,20 +492,7 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
       if (!form) throw new Error('This form does not exist or was removed.');
       if (form.closed) throw new Error('This form is closed and no longer accepting responses.');
 
-      // Only the student-info fields the teacher chose to collect for this
-      // form are required — others are simply not stored.
-      const fields = getStudentFields(form);
-      const missing = [];
-      if (fields.name && !name) missing.push('name');
-      if (fields.registerNo && !registerNo) missing.push('register number');
-      if (fields.department && !department) missing.push('department');
-      if (fields.email && !email) missing.push('email');
-      if (missing.length) throw new Error(`Please fill in your ${missing.join(', ')}.`);
-      if (fields.email && email && !emailPattern.test(email)) throw new Error('That email address looks invalid.');
-
-      // Duplicate-submission protection only applies when register number is
-      // actually being collected for this form.
-      if (fields.registerNo && registerNo) {
+      if (fields.registerNo) {
         const alreadyRegistered = data.responses.some(
           r => r.formId === formId && r.registerNo && r.registerNo.toLowerCase() === registerNo.toLowerCase()
         );
@@ -688,10 +535,10 @@ app.post('/api/public/forms/:id/responses', async (req, res) => {
       data.responses.push({
         id: uuidv4(),
         formId,
-        name: fields.name ? name : '',
-        registerNo: fields.registerNo ? registerNo : '',
-        department: fields.department ? department : '',
-        email: fields.email ? email : '',
+        name,
+        registerNo,
+        department,
+        email,
         answers: cleanAnswers,
         score,
         maxScore,
